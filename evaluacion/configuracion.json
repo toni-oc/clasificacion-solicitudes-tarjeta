@@ -1,0 +1,82 @@
+{
+  "separador": "StratifiedGroupKFold",
+  "bloques_reserva": 5,
+  "bloque_test": 0,
+  "semilla_test": 42,
+  "folds_desarrollo": 5,
+  "semilla_cv": 43,
+  "objetivo": "label",
+  "columnas_candidatas": [
+    "GENDER",
+    "Car_Owner",
+    "Propert_Owner",
+    "CHILDREN",
+    "Annual_income",
+    "Type_Income",
+    "EDUCATION",
+    "Marital_status",
+    "Housing_type",
+    "Birthday_count",
+    "Employed_days",
+    "Work_Phone",
+    "Phone",
+    "EMAIL_ID",
+    "Type_Occupation",
+    "Family_Members"
+  ],
+  "columnas_perfil": [
+    "GENDER",
+    "Car_Owner",
+    "Propert_Owner",
+    "CHILDREN",
+    "Annual_income",
+    "Type_Income",
+    "EDUCATION",
+    "Marital_status",
+    "Housing_type",
+    "Birthday_count",
+    "Employed_days",
+    "Mobile_phone",
+    "Work_Phone",
+    "Phone",
+    "EMAIL_ID",
+    "Type_Occupation",
+    "Family_Members"
+  ],
+  "sha256_fuentes": {
+    "Credit_card.csv": "09a6c906ba5d36daf81fddbd386cb35376cdd194837d9d0885aa4dc4cbe4e3aa",
+    "Credit_card_label.csv": "b6932c1553de915e7595524280b88ec69bf94a5ae37c3d640c43610f9a576337"
+  },
+  "orden_entrada": "Orden de Ind_ID en Credit_card.csv; grupos numerados por primera aparición, con ausencias incluidas",
+  "entorno": {
+    "python": "3.13.2",
+    "pandas": "3.0.3",
+    "numpy": "2.4.6",
+    "scikit_learn": "1.9.0"
+  },
+  "metrica_principal": "F1 medio no ponderado entre folds, clase positiva 1",
+  "metricas_complementarias": [
+    "desviación de F1 entre folds",
+    "recall",
+    "precisión",
+    "ROC-AUC con puntuaciones",
+    "matriz de confusión",
+    "accuracy descriptiva"
+  ],
+  "referencias": [
+    "clase mayoritaria del entrenamiento",
+    "siempre clase 1"
+  ],
+  "umbral_inicial": 0.5,
+  "tolerancia_simplicidad_f1": 0.01,
+  "prioridad_familias_en_tolerancia": [
+    "regresión logística",
+    "árbol de decisión",
+    "Random Forest"
+  ],
+  "desempate_dentro_familia": [
+    "menor desviación de F1 entre folds",
+    "mayor F1 medio"
+  ],
+  "alcance": "Evaluación interna sobre datos públicos ya examinados; sin validación externa ni temporal acreditada"
+}

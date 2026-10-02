@@ -2,7 +2,7 @@
 
 Análisis de solicitudes de tarjeta de crédito mediante modelos de clasificación, con atención a la interpretación de los datos, los errores de predicción y la claridad del procedimiento. Proyecto de portfolio desarrollado a partir de la práctica de clasificación del curso JYTS.
 
-**Estado:** objetivo, carga y unión de datos implementados. La preparación, los modelos y su evaluación están pendientes; todavía no se presentan resultados predictivos.
+**Estado:** objetivo, carga, diagnóstico de calidad y diseño de evaluación implementados. Se conservan 1.548 registros y 16 entradas candidatas; las particiones están fijadas. La preparación y los modelos están pendientes; todavía no se presentan resultados predictivos.
 
 [Notebook](notebooks/01-analisis-y-modelado.ipynb) · [Memoria](docs/Memoria-proyecto.md) · [Datos y descarga](data/README.md)
 
@@ -27,11 +27,15 @@ La unidad de análisis inicial es un registro identificado por `Ind_ID`, utiliza
 
 ## Evaluación y resultado esperado
 
-El criterio inicial de comparación será **F1**, acompañado de recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. Se incluirán referencias simples, regresión logística, árbol de decisión y Random Forest. La selección tendrá en cuenta estabilidad, complejidad y explicación, con reglas concretadas antes de entrenar candidatos.
+Se reserva aproximadamente el **20 % para el cierre** (310 registros) y se comparará mediante **cinco folds de validación cruzada** en los 1.238 registros de desarrollo. Los perfiles idénticos en los 17 atributos originales permanecen juntos: no se comparten entre desarrollo y test ni entre entrenamiento y validación. Son grupos de coincidencia, no identidades personales verificadas. La exploración inicial utilizará las 990 filas del entrenamiento del primer fold.
+
+El criterio principal será el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial será **0,5**. Se incluirán dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos compartirán las mismas particiones y cada preparación se ajustará dentro de su entrenamiento.
+
+Entre candidatos situados a no más de **0,01 de F1** del mejor, se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión entre folds y, después, mayor F1 medio. Esta regla limita la complejidad por diferencias pequeñas; no demuestra equivalencia estadística ni establece una mejora mínima útil para un banco. La explicación y las limitaciones de los candidatos se documentarán junto a la elección.
 
 Se compararán pocas mejoras justificadas, incluidas agrupaciones categóricas, transformaciones o variables derivadas y una búsqueda de hiperparámetros que permita bosques de distintas capacidades. Los resultados de validación orientarán la elección; la evaluación de cierre no se utilizará para cambiarla. La ganancia mínima útil y los costes reales no están establecidos.
 
-El conjunto público ya ha sido examinado durante el desarrollo. Repartirlo de nuevo no crea una prueba independiente: las métricas se presentarán como **evaluación interna**, con validación en datos nuevos pendiente. El diseño de particiones y validación se concretará en la siguiente sección.
+El conjunto público ya ha sido examinado durante el desarrollo. Repartirlo de nuevo no crea una prueba independiente: las métricas se presentarán como **evaluación interna**, con validación en datos nuevos pendiente. El [registro de evaluación](evaluacion/README.md) conserva el procedimiento, la configuración y los tamaños de las muestras. Los ajustes de umbral, si se realizan, se decidirán solo en desarrollo.
 
 La entrega prevista incluirá una tabla comparativa, interpretación de errores, justificación del modelo elegido, escenarios de coste y cinco ejemplos de evaluación seleccionados con una regla explícita. Esos ejemplos ilustrarán predicciones, no una implantación en producción.
 
@@ -41,10 +45,11 @@ El notebook se desarrollará en seis secciones: **objetivo y datos; calidad y ev
 
 | Ruta | Contenido actual |
 |---|---|
-| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Primera sección ejecutada, con resultados de carga y unión. |
+| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Objetivo y datos, calidad y diseño de evaluación, con sus resultados ejecutados. |
 | [docs/Memoria-proyecto.md](docs/Memoria-proyecto.md) | Decisiones y conclusiones del recorrido implementado. |
 | [docs/Diccionario-datos.md](docs/Diccionario-datos.md) | Significado, papel y límites de los campos. |
 | [data/README.md](data/README.md) e [inventario](data/inventario_fuentes.json) | Obtención y huellas de los archivos utilizados. Los CSV se conservan localmente en `data/raw/` y están excluidos de Git. |
+| [evaluacion/README.md](evaluacion/README.md) | Configuración y resúmenes de las particiones. La asignación individual se genera localmente y queda excluida de Git. |
 | [requirements.txt](requirements.txt) | Dependencias de la sección implementada. Se ampliarán cuando el código las necesite. |
 
 Los módulos reutilizables, informes y ejemplos se incorporarán conforme se desarrollen; no hay artefactos de modelos todavía.
@@ -73,7 +78,7 @@ En macOS/Linux:
 2. Abrir el notebook en VS Code con soporte Jupyter, o en un entorno Jupyter compatible, y seleccionar el Python del entorno creado.
 3. Reiniciar el kernel y ejecutar las celdas en orden. La carga admite como directorio de trabajo la raíz del repositorio o `notebooks/`.
 
-La ejecución de la sección inicial se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
+La ejecución de las dos secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
 
 ## Fuente
 
