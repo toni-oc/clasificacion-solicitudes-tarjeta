@@ -1,0 +1,53 @@
+Variable,Nivel,Registros,Rechazos,Rechazo (%)
+GENDER,F,626,59,9.424920127795527
+GENDER,M,362,52,14.3646408839779
+GENDER,,2,1,50.0
+Car_Owner,N,596,63,10.570469798657719
+Car_Owner,Y,394,49,12.436548223350254
+Propert_Owner,N,340,44,12.941176470588236
+Propert_Owner,Y,650,68,10.461538461538462
+Type_Income,Commercial associate,238,35,14.705882352941176
+Type_Income,Pensioner,164,23,14.024390243902438
+Type_Income,State servant,73,4,5.47945205479452
+Type_Income,Working,515,50,9.70873786407767
+EDUCATION,Academic degree,1,0,0.0
+EDUCATION,Higher education,260,32,12.307692307692308
+EDUCATION,Incomplete higher,41,1,2.4390243902439024
+EDUCATION,Lower secondary,14,3,21.428571428571427
+EDUCATION,Secondary / secondary special,674,76,11.275964391691394
+Marital_status,Civil marriage,68,4,5.882352941176471
+Marital_status,Married,667,71,10.644677661169416
+Marital_status,Separated,55,4,7.2727272727272725
+Marital_status,Single / not married,157,27,17.197452229299362
+Marital_status,Widow,43,6,13.953488372093023
+Housing_type,Co-op apartment,3,2,66.66666666666667
+Housing_type,House / apartment,884,93,10.520361990950226
+Housing_type,Municipal apartment,34,12,35.294117647058826
+Housing_type,Office apartment,4,0,0.0
+Housing_type,Rented apartment,12,1,8.333333333333334
+Housing_type,With parents,53,4,7.547169811320755
+Type_Occupation,Accountants,30,4,13.333333333333334
+Type_Occupation,Cleaning staff,14,1,7.142857142857143
+Type_Occupation,Cooking staff,14,4,28.571428571428573
+Type_Occupation,Core staff,119,14,11.764705882352942
+Type_Occupation,Drivers,60,7,11.666666666666666
+Type_Occupation,HR staff,3,0,0.0
+Type_Occupation,High skill tech staff,45,4,8.88888888888889
+Type_Occupation,IT staff,2,2,100.0
+Type_Occupation,Laborers,162,23,14.197530864197532
+Type_Occupation,Low-skill Laborers,6,2,33.333333333333336
+Type_Occupation,Managers,86,10,11.627906976744185
+Type_Occupation,Medicine staff,26,0,0.0
+Type_Occupation,Private service staff,12,0,0.0
+Type_Occupation,Realty agents,1,0,0.0
+Type_Occupation,Sales staff,83,6,7.228915662650603
+Type_Occupation,Secretaries,7,0,0.0
+Type_Occupation,Security staff,12,2,16.666666666666668
+Type_Occupation,Waiters/barmen staff,3,0,0.0
+Type_Occupation,,305,33,10.819672131147541
+Work_Phone,0,768,86,11.197916666666666
+Work_Phone,1,222,26,11.711711711711711
+Phone,0,675,76,11.25925925925926
+Phone,1,315,36,11.428571428571429
+EMAIL_ID,0,897,101,11.259754738015607
+EMAIL_ID,1,93,11,11.827956989247312

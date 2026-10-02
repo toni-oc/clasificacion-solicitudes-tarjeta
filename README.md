@@ -2,7 +2,7 @@
 
 Análisis de solicitudes de tarjeta de crédito mediante modelos de clasificación, con atención a la interpretación de los datos, los errores de predicción y la claridad del procedimiento. Proyecto de portfolio desarrollado a partir de la práctica de clasificación del curso JYTS.
 
-**Estado:** objetivo, carga, diagnóstico de calidad y diseño de evaluación implementados. Se conservan 1.548 registros y 16 entradas candidatas; las particiones están fijadas. La preparación y los modelos están pendientes; todavía no se presentan resultados predictivos.
+**Estado:** objetivo, datos, calidad, evaluación y preparación inicial implementados. La exploración utiliza 990 registros de entrenamiento; las 16 entradas originales se convierten en 40 columnas para modelar. Las particiones se conservan. Los modelos y sus resultados predictivos están pendientes.
 
 [Notebook](notebooks/01-analisis-y-modelado.ipynb) · [Memoria](docs/Memoria-proyecto.md) · [Datos y descarga](data/README.md)
 
@@ -19,7 +19,7 @@ La unidad de análisis inicial es un registro identificado por `Ind_ID`, utiliza
 | Cuestión | Criterio de trabajo |
 |---|---|
 | Ausencias y situación laboral | Interpretar códigos y contextos antes de imputar. Una ausencia no demuestra ocultación ni desempleo. Los tratamientos estadísticos se ajustarán con entrenamiento. |
-| Categorías poco frecuentes | Implementar agrupaciones con significado compartido, justificadas en una tabla de correspondencias. La frecuencia se medirá en entrenamiento; no se mezclarán categorías incompatibles para alcanzar un recuento. |
+| Categorías poco frecuentes | Agrupaciones de ocupación, educación y vivienda documentadas por significado y cobertura en entrenamiento. Su mejora predictiva está pendiente de comparación. No se impone un mínimo común de registros. |
 | Variables numéricas | Distinguir códigos especiales, errores y extremos plausibles. Contrastar límites o transformaciones cuando estén justificados, sin fijar de antemano medias, medianas o percentiles. |
 | Desbalance y capacidad de revisión | Comparar detección de rechazos y falsas alertas sobre aprobaciones. La accuracy será descriptiva y no decidirá el ganador. La capacidad real de revisión se desconoce. |
 | Explicabilidad y pertinencia | Examinar reglas, contribución de variables y errores relevantes. Las asociaciones no prueban causalidad, equidad o legitimidad de uso de atributos personales. |
@@ -33,11 +33,19 @@ El criterio principal será el **F1 medio no ponderado entre folds de la clase r
 
 Entre candidatos situados a no más de **0,01 de F1** del mejor, se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión entre folds y, después, mayor F1 medio. Esta regla limita la complejidad por diferencias pequeñas; no demuestra equivalencia estadística ni establece una mejora mínima útil para un banco. La explicación y las limitaciones de los candidatos se documentarán junto a la elección.
 
-Se compararán pocas mejoras justificadas, incluidas agrupaciones categóricas, transformaciones o variables derivadas y una búsqueda de hiperparámetros que permita bosques de distintas capacidades. Los resultados de validación orientarán la elección; la evaluación de cierre no se utilizará para cambiarla. La ganancia mínima útil y los costes reales no están establecidos.
+Se compararán pocas mejoras justificadas, incluidas alternativas a las agrupaciones iniciales, transformaciones o variables derivadas y una búsqueda de hiperparámetros que permita bosques de distintas capacidades. Los resultados de validación orientarán la elección; la evaluación de cierre no se utilizará para cambiarla. La ganancia mínima útil y los costes reales no están establecidos.
 
 El conjunto público ya ha sido examinado durante el desarrollo. Repartirlo de nuevo no crea una prueba independiente: las métricas se presentarán como **evaluación interna**, con validación en datos nuevos pendiente. El [registro de evaluación](evaluacion/README.md) conserva el procedimiento, la configuración y los tamaños de las muestras. Los ajustes de umbral, si se realizan, se decidirán solo en desarrollo.
 
 La entrega prevista incluirá una tabla comparativa, interpretación de errores, justificación del modelo elegido, escenarios de coste y cinco ejemplos de evaluación seleccionados con una regla explícita. Esos ejemplos ilustrarán predicciones, no una implantación en producción.
+
+## Preparación inicial
+
+La exploración conserva los extremos plausibles. Se convierten los días relativos en años, se separa el código especial de empleo y se añade un indicador de ingreso ausente. Se agrupan ocupaciones en seis familias, educación en tres niveles y vivienda en cuatro modalidades; las [correspondencias y sus límites](docs/Agrupaciones-categoricas.md) explican qué información se simplifica.
+
+Las categorías ausentes se representan explícitamente. Ingreso y edad se imputan con medianas aprendidas en entrenamiento. Para el código especial de empleo se utiliza duración cero como soporte de cálculo junto con su indicador, sin presentarlo como antigüedad observada. El pipeline reúne estas reglas, la codificación nominal y el escalado para logística. Los indicadores binarios permanecen en 0/1; para árboles se podrá desactivar el escalado.
+
+La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta una categoría futura no conocida. Este diagnóstico no mide rendimiento predictivo: al comparar candidatos se ajustará una copia nueva del pipeline en cada fold.
 
 ## Recorrido y archivos
 
@@ -45,14 +53,17 @@ El notebook se desarrollará en seis secciones: **objetivo y datos; calidad y ev
 
 | Ruta | Contenido actual |
 |---|---|
-| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Objetivo y datos, calidad y diseño de evaluación, con sus resultados ejecutados. |
+| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Tres secciones ejecutadas: objetivo y datos, calidad y evaluación, exploración y preparación. |
 | [docs/Memoria-proyecto.md](docs/Memoria-proyecto.md) | Decisiones y conclusiones del recorrido implementado. |
 | [docs/Diccionario-datos.md](docs/Diccionario-datos.md) | Significado, papel y límites de los campos. |
+| [docs/Agrupaciones-categoricas.md](docs/Agrupaciones-categoricas.md) | Criterios semánticos, cobertura y límites de las agrupaciones iniciales. |
+| [src/preparacion.py](src/preparacion.py) | Conversiones, indicadores y agrupaciones reutilizables, sin estadísticas aprendidas fuera del pipeline. |
+| [reports/README.md](reports/README.md) | Tablas agregadas de categorías, correspondencias e imputaciones del entrenamiento. |
 | [data/README.md](data/README.md) e [inventario](data/inventario_fuentes.json) | Obtención y huellas de los archivos utilizados. Los CSV se conservan localmente en `data/raw/` y están excluidos de Git. |
 | [evaluacion/README.md](evaluacion/README.md) | Configuración y resúmenes de las particiones. La asignación individual se genera localmente y queda excluida de Git. |
 | [requirements.txt](requirements.txt) | Dependencias de la sección implementada. Se ampliarán cuando el código las necesite. |
 
-Los módulos reutilizables, informes y ejemplos se incorporarán conforme se desarrollen; no hay artefactos de modelos todavía.
+Los ejemplos de predicción y los artefactos de modelos se incorporarán cuando se desarrollen esas fases.
 
 ## Ejecución
 
@@ -78,7 +89,7 @@ En macOS/Linux:
 2. Abrir el notebook en VS Code con soporte Jupyter, o en un entorno Jupyter compatible, y seleccionar el Python del entorno creado.
 3. Reiniciar el kernel y ejecutar las celdas en orden. La carga admite como directorio de trabajo la raíz del repositorio o `notebooks/`.
 
-La ejecución de las dos secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
+La ejecución de las tres secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
 
 ## Fuente
 

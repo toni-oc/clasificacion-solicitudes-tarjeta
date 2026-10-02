@@ -1,0 +1,14 @@
+Variable,Grupo,Categorías originales
+Type_Occupation,Administracion_y_gestion,"Accountants, HR staff, Managers, Secretaries"
+Type_Occupation,Tecnicas_y_profesionales,"High skill tech staff, IT staff, Medicine staff"
+Type_Occupation,Produccion_y_transporte,"Laborers, Low-skill Laborers, Drivers"
+Type_Occupation,Ventas,"Sales staff, Realty agents"
+Type_Occupation,Servicios_de_apoyo,"Cleaning staff, Cooking staff, Private service staff, Security staff, Waiters/barmen staff"
+Type_Occupation,Personal_general,Core staff
+EDUCATION,Superior_completa,"Academic degree, Higher education"
+EDUCATION,Superior_incompleta,Incomplete higher
+EDUCATION,Secundaria,"Lower secondary, Secondary / secondary special"
+Housing_type,Casa_o_apartamento,House / apartment
+Housing_type,Con_familiares,With parents
+Housing_type,Alquiler_declarado,Rented apartment
+Housing_type,Institucional_o_colectiva,"Municipal apartment, Office apartment, Co-op apartment"

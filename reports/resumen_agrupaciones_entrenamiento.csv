@@ -1,0 +1,15 @@
+Variable,Grupo,Registros,Rechazos,Rechazo (%)
+Type_Occupation,Administracion_y_gestion,126,14,11.11111111111111
+Type_Occupation,Personal_general,119,14,11.764705882352942
+Type_Occupation,Produccion_y_transporte,228,32,14.035087719298245
+Type_Occupation,Servicios_de_apoyo,55,7,12.727272727272727
+Type_Occupation,Tecnicas_y_profesionales,73,6,8.219178082191782
+Type_Occupation,Ventas,84,6,7.142857142857143
+Type_Occupation,__AUSENTE__,305,33,10.819672131147541
+EDUCATION,Secundaria,688,79,11.482558139534884
+EDUCATION,Superior_completa,261,32,12.260536398467433
+EDUCATION,Superior_incompleta,41,1,2.4390243902439024
+Housing_type,Alquiler_declarado,12,1,8.333333333333334
+Housing_type,Casa_o_apartamento,884,93,10.520361990950226
+Housing_type,Con_familiares,53,4,7.547169811320755
+Housing_type,Institucional_o_colectiva,41,14,34.146341463414636
