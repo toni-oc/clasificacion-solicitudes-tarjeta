@@ -88,11 +88,21 @@ Se distinguen cinco cantidades, ocho categorías nominales y los indicadores bin
 
 ### Distribuciones, extremos y relaciones numéricas
 
-Los histogramas y frecuencias muestran un ingreso con cola derecha, edades entre 21,10 y 67,52 años y concentraciones en hogares pequeños. El límite exploratorio IQR del ingreso es 380.925; hay 50 registros por encima y el máximo alcanza 1.575.000. Un registro tiene 14 hijos y 15 miembros de familia. Se revisan ejemplos junto a su contexto, sin encontrar evidencia que permita declararlos errores. La preparación inicial conserva esos valores; el límite IQR no se aplica como recorte.
+Los histogramas y frecuencias muestran un ingreso con cola derecha, edades entre 21,10 y 67,52 años y concentraciones en recuentos familiares pequeños. El límite exploratorio IQR del ingreso es 380.925; hay 50 registros por encima, incluidos dos de 1.575.000. Un registro tiene 14 hijos y 15 miembros de familia. Se revisan junto a su contexto, sin evidencia que permita declararlos errores. La preparación inicial conserva las filas y sus valores: ser excepcional no demuestra que un registro perjudique al modelo.
 
-La antigüedad mediana interpretable es 5,74 años en aprobaciones y 3,18 en rechazos, con solapamiento entre clases. El gráfico de ingresos por etiqueta utiliza una escala logarítmica solo para visualizar; la entrada no se transforma. La correlación de Spearman entre hijos y miembros de familia es 0,823. Se conservan ambas cantidades inicialmente: compartir información no demuestra que una sea prescindible para todos los modelos.
+Se comprueba el alcance de un posible límite P99 del ingreso: en este entrenamiento sería 599.220 y afectaría a diez registros, no solo a los dos máximos. El recorte no se aplica. Queda definido como una comparación posterior frente a conservar el ingreso: el límite se aprenderá dentro de cada entrenamiento y se aplicará sin recalcularlo en la validación correspondiente, conservando las filas. No se fijan topes para hijos o familia sin una regla de dominio que los respalde.
 
-Estas asociaciones describen decisiones históricas en entrenamiento. No prueban causalidad ni anticipan la utilidad predictiva de una transformación. Los recortes, logaritmos o reducciones de entradas siguen siendo posibles mejoras por contrastar.
+Los boxplots muestran medianas, no medias. La antigüedad mediana interpretable es 5,74 años en aprobaciones y 3,18 en rechazos, con solapamiento; ingreso y edad también se solapan. Cada gráfico indica cuántos valores informados utiliza y excluye las duraciones sin interpretar. El tamaño de la caja refleja el intervalo entre percentiles 25 y 75, no el número de registros. El gráfico del ingreso utiliza una escala logarítmica solo para visualizar; la entrada no se transforma.
+
+Estas asociaciones describen decisiones históricas en entrenamiento. No prueban causalidad, no justifican pesos manuales para las variables y no bastan para descartar una aportación conjunta al modelo. La correlación de Spearman entre hijos y miembros de familia es 0,823; se estudia qué información comparten antes de reducir entradas.
+
+### Relación entre familia, hijos y estado civil
+
+Se calcula la diferencia `Family_Members − CHILDREN` únicamente para explorar su relación con el estado civil, el ingreso registrado y la etiqueta. Vale 1 en 245 registros y 2 en 745. Las categorías `Married` y `Civil marriage` aparecen con diferencia 2; separados y viudos, con diferencia 1. Entre los 157 registros de `Single / not married` hay 147 con diferencia 1 y diez con diferencia 2. La asociación es fuerte, pero no una equivalencia exacta ni una prueba de convivencia o número de perceptores de ingresos.
+
+El rechazo es 29/245 (11,84 %) y 83/745 (11,14 %), respectivamente. Los ingresos medianos son 175.500 y 157.500, calculados sobre 237 y 735 ingresos informados. No se observa menor ingreso registrado en el primer grupo, y la proximidad de las tasas no acredita equivalencia estadística. Tampoco se pueden interpretar estas cifras como ingresos totales del hogar ni atribuir un efecto al divorcio.
+
+La diferencia no se incorpora al pipeline: resume información disponible y muy vinculada al estado civil, sin una interpretación adicional suficientemente acreditada. Se mantienen ambas cantidades familiares en la referencia inicial. La simplificación concreta que se contrastará después es excluir `CHILDREN` conservando `Family_Members` y `Marital_status`. Se evaluará por separado del recorte del ingreso, frente al mismo modelo y particiones, para poder distinguir el efecto de cada cambio. Ninguna de las dos mejoras está implementada en la preparación ni evaluada predictivamente.
 
 ### Categorías y agrupaciones con significado
 
@@ -128,4 +138,52 @@ La preparación produce 40 columnas numéricas y conserva las 990 filas con sus 
 
 Un ejemplo sintético combina una ocupación nueva con ingreso ausente. La preparación mantiene las columnas, activa el indicador de ausencia y codifica la ocupación desconocida con ceros en su bloque, sin reajustar estadísticas. Los [resúmenes de entrenamiento](../reports/README.md) conservan agrupaciones y medianas.
 
-No se modifican las particiones tras agrupar: coincidencias creadas por la simplificación no demuestran duplicidad de los registros originales. Las agrupaciones y el indicador de ingreso quedan implementados como preparación inicial, con su aportación predictiva pendiente de contraste. El siguiente bloque evaluará las referencias y los modelos sobre las particiones acordadas.
+No se modifican las particiones tras agrupar: coincidencias creadas por la simplificación no demuestran duplicidad de los registros originales. Las agrupaciones y el indicador de ingreso quedan implementados como preparación inicial, con su aportación predictiva pendiente de contraste. Esta preparación es el punto de partida de la comparación de modelos.
+
+## Comparación inicial de modelos
+
+### Condiciones de comparación
+
+Se comparan dos referencias y tres modelos en los 1.238 registros de desarrollo, con los cinco folds agrupados y estratificados fijados previamente. La clase positiva sigue siendo el rechazo registrado. Se conserva el umbral 0,5 y el F1 medio no ponderado entre folds como criterio principal. No se usan los 310 registros de test para entrenar, comparar o interpretar errores de este bloque.
+
+### Referencias y modelos candidatos
+
+La referencia mayoritaria predice la clase más frecuente de cada entrenamiento; la segunda predice siempre rechazo. Permiten contextualizar resultados elevados de accuracy o recall que no requieren aprender relaciones entre atributos.
+
+La logística utiliza L2 con C=1 y escalado numérico. El árbol limita su profundidad a cinco y exige al menos cinco registros por hoja. Random Forest utiliza 200 árboles, mínimo dos registros por hoja, selección de atributos por raíz cuadrada y ninguna profundidad máxima fija. Árbol y bosque no escalan las cantidades. Se usa una configuración inicial por modelo, sin ponderación de clases, conservando extremos, agrupaciones y ambas cantidades familiares. No se consideran configuraciones óptimas ni se atribuye a una decisión de preparación una mejora todavía no comparada.
+
+### Entrenamiento y validación comunes
+
+La [rutina de evaluación](../src/evaluacion.py) crea una copia nueva de cada candidato en cada fold. El pipeline aprende imputaciones, codificación y, en logística, escalado únicamente con su entrenamiento. La tabla preparada durante la exploración no se reutiliza como entrada general. Este orden coincide con la [separación entre ajuste y transformación recomendada por scikit-learn](https://scikit-learn.org/stable/common_pitfalls.html#how-to-avoid-data-leakage).
+
+Se ejecutan 25 ajustes y se obtiene una predicción de validación por registro y candidato. Se comprueban cobertura, alineación y conservación de los grupos. Las plantillas permanecen sin ajustar: no se entrega el modelo de un fold ni se reajusta todavía con todo desarrollo. La adaptación manual durante el análisis exploratorio y el conocimiento previo del conjunto mantienen el alcance de evaluación interna.
+
+### Resultados y estabilidad
+
+Las métricas siguientes son medias entre folds; la desviación del F1 es muestral, no un intervalo de confianza. La precisión sin predicciones positivas se registra como cero por convenio.
+
+| Candidato | F1 validación | Desv. F1 | Precisión | Recall | ROC-AUC | Accuracy | F1 entrenamiento |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Mayoritaria | 0,000 | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 | 0,000 |
+| Siempre rechazo | 0,203 | 0,000 | 0,113 | 1,000 | 0,500 | 0,113 | 0,203 |
+| Logística | 0,080 | 0,070 | 0,700 | 0,043 | 0,605 | 0,891 | 0,098 |
+| Árbol | 0,113 | 0,066 | 0,296 | 0,071 | 0,498 | 0,877 | 0,343 |
+| Random Forest | 0,103 | 0,094 | 0,600 | 0,057 | 0,646 | 0,890 | 0,704 |
+
+La referencia mayoritaria alcanza 88,69 % de accuracy sin detectar rechazos. Ningún modelo supera el F1 de siempre rechazo, que a su vez rechaza todas las aprobaciones registradas. Por tanto, ninguna configuración inicial proporciona todavía un resultado satisfactorio.
+
+Todos los modelos tienen algún fold con F1 cero. El bosque presenta F1 entre 0 y 0,25, con una brecha amplia entre entrenamiento y validación; el árbol también pierde rendimiento. Esto aconseja revisar generalización y complejidad, sin identificar una única causa. La logística tiene F1 bajo incluso al entrenar: atribuir todos los resultados débiles al sobreajuste sería incorrecto. El mejor ROC-AUC del bosque no se traduce en buena detección al umbral inicial.
+
+### Lectura de los errores
+
+Las matrices agregadas contienen 1.098 aprobaciones y 140 rechazos registrados, cada uno evaluado fuera de su entrenamiento correspondiente. La logística detecta seis rechazos y genera un falso rechazo; el árbol detecta diez y genera 22; el bosque detecta ocho y genera cuatro. Quedan sin detectar 134, 130 y 132 rechazos, respectivamente.
+
+El problema común es la detección escasa con umbral 0,5. Una precisión relativamente alta no compensa por sí sola ese resultado. Las métricas calculadas sobre las matrices agregadas pueden diferir de las medias entre folds: por ejemplo, la logística tiene precisión agregada 6/7, mientras que la tabla recoge la media por fold de 0,700. Ninguno de estos errores equivale directamente a impago, ahorro o perjuicio económico observado.
+
+### Elección provisional y siguientes mejoras
+
+El árbol encabeza el F1 entre los modelos. La diferencia con el bosque es 0,01027, ligeramente superior a la tolerancia de 0,01, por lo que queda como configuración provisional para continuar comparando. Esa regla no acredita superioridad estadística y no convierte al árbol en modelo aceptado: su F1 sigue por debajo de la referencia de siempre rechazo.
+
+El diagnóstico justifica estudiar ponderación o ajuste de umbral en desarrollo para abordar la detección, distinguiendo cambios en las decisiones de cambios en el ranking. El bosque mantiene interés por su ROC-AUC, con su brecha de generalización pendiente de revisión. El P99 del ingreso y la exclusión de `CHILDREN` continúan como contrastes separados frente a una referencia común. No se ha implementado ninguna de esas mejoras ni se promete que produzcan una ganancia.
+
+Se conservan [configuraciones, métricas por fold y errores agregados](../reports/README.md). Las predicciones individuales quedan en local. No se evalúa test ni se declara un modelo final; las mejoras seleccionadas constituyen la siguiente fase.

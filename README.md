@@ -2,7 +2,7 @@
 
 Análisis de solicitudes de tarjeta de crédito mediante modelos de clasificación, con atención a la interpretación de los datos, los errores de predicción y la claridad del procedimiento. Proyecto de portfolio desarrollado a partir de la práctica de clasificación del curso JYTS.
 
-**Estado:** objetivo, datos, calidad, evaluación y preparación inicial implementados. La exploración utiliza 990 registros de entrenamiento; las 16 entradas originales se convierten en 40 columnas para modelar. Las particiones se conservan. Los modelos y sus resultados predictivos están pendientes.
+**Estado:** objetivo, datos, calidad, preparación y comparación inicial implementados. Se evalúan dos referencias y tres modelos en cinco folds de desarrollo. Con umbral 0,5, ninguno supera el F1 de la referencia de siempre rechazo; el proyecto continúa en mejora, sin modelo final ni evaluación de test.
 
 [Notebook](notebooks/01-analisis-y-modelado.ipynb) · [Memoria](docs/Memoria-proyecto.md) · [Datos y descarga](data/README.md)
 
@@ -27,9 +27,9 @@ La unidad de análisis inicial es un registro identificado por `Ind_ID`, utiliza
 
 ## Evaluación y resultado esperado
 
-Se reserva aproximadamente el **20 % para el cierre** (310 registros) y se comparará mediante **cinco folds de validación cruzada** en los 1.238 registros de desarrollo. Los perfiles idénticos en los 17 atributos originales permanecen juntos: no se comparten entre desarrollo y test ni entre entrenamiento y validación. Son grupos de coincidencia, no identidades personales verificadas. La exploración inicial utilizará las 990 filas del entrenamiento del primer fold.
+Se reserva aproximadamente el **20 % para el cierre** (310 registros) y se comparan candidatos mediante **cinco folds de validación cruzada** en los 1.238 registros de desarrollo. Los perfiles idénticos en los 17 atributos originales permanecen juntos: no se comparten entre desarrollo y test ni entre entrenamiento y validación. Son grupos de coincidencia, no identidades personales verificadas. La exploración inicial utiliza las 990 filas del entrenamiento del primer fold.
 
-El criterio principal será el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial será **0,5**. Se incluirán dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos compartirán las mismas particiones y cada preparación se ajustará dentro de su entrenamiento.
+El criterio principal es el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial es **0,5**. Se incluyen dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos comparten las mismas particiones y cada preparación se ajusta dentro de su entrenamiento.
 
 Entre candidatos situados a no más de **0,01 de F1** del mejor, se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión entre folds y, después, mayor F1 medio. Esta regla limita la complejidad por diferencias pequeñas; no demuestra equivalencia estadística ni establece una mejora mínima útil para un banco. La explicación y las limitaciones de los candidatos se documentarán junto a la elección.
 
@@ -41,11 +41,29 @@ La entrega prevista incluirá una tabla comparativa, interpretación de errores,
 
 ## Preparación inicial
 
-La exploración conserva los extremos plausibles. Se convierten los días relativos en años, se separa el código especial de empleo y se añade un indicador de ingreso ausente. Se agrupan ocupaciones en seis familias, educación en tres niveles y vivienda en cuatro modalidades; las [correspondencias y sus límites](docs/Agrupaciones-categoricas.md) explican qué información se simplifica.
+La exploración conserva los extremos sin error confirmado y las dos cantidades familiares como referencia inicial. Quedan propuestos dos contrastes separados: limitar el ingreso al P99 aprendido en entrenamiento y excluir el número de hijos conservando el tamaño familiar y el estado civil. La diferencia familia–hijos se explora, pero no se añade al modelo. Estas variantes todavía no se han aplicado ni evaluado predictivamente.
+
+Se convierten los días relativos en años, se separa el código especial de empleo y se añade un indicador de ingreso ausente. Se agrupan ocupaciones en seis familias, educación en tres niveles y vivienda en cuatro modalidades; las [correspondencias y sus límites](docs/Agrupaciones-categoricas.md) explican qué información se simplifica.
 
 Las categorías ausentes se representan explícitamente. Ingreso y edad se imputan con medianas aprendidas en entrenamiento. Para el código especial de empleo se utiliza duración cero como soporte de cálculo junto con su indicador, sin presentarlo como antigüedad observada. El pipeline reúne estas reglas, la codificación nominal y el escalado para logística. Los indicadores binarios permanecen en 0/1; para árboles se podrá desactivar el escalado.
 
-La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta una categoría futura no conocida. Este diagnóstico no mide rendimiento predictivo: al comparar candidatos se ajustará una copia nueva del pipeline en cada fold.
+La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta una categoría futura no conocida. Esa tabla preparada sirve para diagnóstico; la comparación ajusta una copia nueva del pipeline en cada fold a partir de las entradas originales.
+
+## Resultados iniciales de desarrollo
+
+Medias de cinco folds, clase positiva rechazo y umbral 0,5; no son resultados de test:
+
+| Candidato | F1 medio | Desv. F1 | Recall | ROC-AUC | Accuracy |
+|---|---:|---:|---:|---:|---:|
+| Mayoritaria | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 |
+| Siempre rechazo | 0,203 | 0,000 | 1,000 | 0,500 | 0,113 |
+| Logística | 0,080 | 0,070 | 0,043 | 0,605 | 0,891 |
+| Árbol | 0,113 | 0,066 | 0,071 | 0,498 | 0,877 |
+| Random Forest | 0,103 | 0,094 | 0,057 | 0,646 | 0,890 |
+
+La accuracy cercana al 89 % oculta una detección muy baja: de 140 rechazos, logística identifica seis, árbol diez y bosque ocho. El árbol encabeza el F1 entre los modelos, pero ninguno supera la referencia de siempre rechazo; no se considera alcanzado un resultado suficiente. El bosque obtiene el mejor ROC-AUC, junto con una brecha importante entre entrenamiento y validación. Los [resultados por fold y errores](reports/README.md) y la [memoria](docs/Memoria-proyecto.md) desarrollan esta lectura.
+
+El siguiente bloque abordará la baja detección mediante mejoras acotadas en desarrollo, sin asumir que un ajuste del umbral mejora el ranking. El recorte P99 del ingreso y la exclusión de `CHILDREN` siguen pendientes de comparación. No se cambia el test ni se presenta una configuración inicial como modelo final.
 
 ## Recorrido y archivos
 
@@ -53,12 +71,13 @@ El notebook se desarrollará en seis secciones: **objetivo y datos; calidad y ev
 
 | Ruta | Contenido actual |
 |---|---|
-| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Tres secciones ejecutadas: objetivo y datos, calidad y evaluación, exploración y preparación. |
+| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Cuatro secciones ejecutadas, hasta comparación inicial de modelos. Mejoras y cierre pendientes. |
 | [docs/Memoria-proyecto.md](docs/Memoria-proyecto.md) | Decisiones y conclusiones del recorrido implementado. |
 | [docs/Diccionario-datos.md](docs/Diccionario-datos.md) | Significado, papel y límites de los campos. |
 | [docs/Agrupaciones-categoricas.md](docs/Agrupaciones-categoricas.md) | Criterios semánticos, cobertura y límites de las agrupaciones iniciales. |
 | [src/preparacion.py](src/preparacion.py) | Conversiones, indicadores y agrupaciones reutilizables, sin estadísticas aprendidas fuera del pipeline. |
-| [reports/README.md](reports/README.md) | Tablas agregadas de categorías, correspondencias e imputaciones del entrenamiento. |
+| [src/evaluacion.py](src/evaluacion.py) | Rutina común que clona, entrena y evalúa candidatos en los folds fijados. |
+| [reports/README.md](reports/README.md) | Diagnóstico de entrenamiento y comparación de modelos: métricas, errores agregados y configuraciones. |
 | [data/README.md](data/README.md) e [inventario](data/inventario_fuentes.json) | Obtención y huellas de los archivos utilizados. Los CSV se conservan localmente en `data/raw/` y están excluidos de Git. |
 | [evaluacion/README.md](evaluacion/README.md) | Configuración y resúmenes de las particiones. La asignación individual se genera localmente y queda excluida de Git. |
 | [requirements.txt](requirements.txt) | Dependencias de la sección implementada. Se ampliarán cuando el código las necesite. |
@@ -89,7 +108,7 @@ En macOS/Linux:
 2. Abrir el notebook en VS Code con soporte Jupyter, o en un entorno Jupyter compatible, y seleccionar el Python del entorno creado.
 3. Reiniciar el kernel y ejecutar las celdas en orden. La carga admite como directorio de trabajo la raíz del repositorio o `notebooks/`.
 
-La ejecución de las tres secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
+La ejecución de las cuatro secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
 
 ## Fuente
 
