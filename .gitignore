@@ -1,0 +1,21 @@
+# Entornos y archivos locales
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.env
+.env.*
+.DS_Store
+.vscode/
+
+# Fuentes descargadas y resultados individuales
+/data/raw/
+/data/processed/
+/evaluacion/particiones.csv
+/reports/**/predicciones*.csv
+/reports/**/casos*.csv
+
+# Los artefactos entrenados se incorporarán solo al preparar la entrega
+*.joblib
+*.pkl

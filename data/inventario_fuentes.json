@@ -1,0 +1,21 @@
+{
+  "fuente": "https://www.kaggle.com/datasets/rohitudageri/credit-card-details",
+  "consulta_documental": "2026-10-02",
+  "obtencion": "Archivos descargados manualmente de la fuente y conservados sin cambios",
+  "fecha_descarga": null,
+  "version_declarada_en_la_consulta": 1,
+  "licencia_declarada": "CC0: Public Domain",
+  "version_historica_de_los_archivos": null,
+  "archivos": [
+    {
+      "archivo": "raw/Credit_card.csv",
+      "bytes": 186815,
+      "sha256": "09a6c906ba5d36daf81fddbd386cb35376cdd194837d9d0885aa4dc4cbe4e3aa"
+    },
+    {
+      "archivo": "raw/Credit_card_label.csv",
+      "bytes": 17042,
+      "sha256": "b6932c1553de915e7595524280b88ec69bf94a5ae37c3d640c43610f9a576337"
+    }
+  ]
+}
