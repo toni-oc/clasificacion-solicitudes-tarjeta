@@ -2,7 +2,7 @@
 
 Análisis de solicitudes de tarjeta de crédito mediante modelos de clasificación, con atención a la interpretación de los datos, los errores de predicción y la claridad del procedimiento. Proyecto de portfolio desarrollado a partir de la práctica de clasificación del curso JYTS.
 
-**Estado:** objetivo, datos, calidad, preparación y comparación inicial implementados. Se evalúan dos referencias y tres modelos en cinco folds de desarrollo. Con umbral 0,5, ninguno supera el F1 de la referencia de siempre rechazo; el proyecto continúa en mejora, sin modelo final ni evaluación de test.
+**Estado:** objetivo, datos, calidad, preparación y comparación inicial implementados. Se evalúan dos referencias y tres modelos en cinco folds de desarrollo. Con clases ponderadas y umbral 0,5, Random Forest encabeza el F1 medio (0,520). El proyecto continúa en mejora, sin modelo final ni evaluación de test.
 
 [Notebook](notebooks/01-analisis-y-modelado.ipynb) · [Memoria](docs/Memoria-proyecto.md) · [Datos y descarga](data/README.md)
 
@@ -12,7 +12,7 @@ En admisión de crédito, aceptar una operación problemática puede producir p�
 
 La fuente disponible registra **decisiones históricas**, no impagos observados: `label = 0` significa aprobación y `label = 1`, rechazo. El objetivo técnico es clasificar esa decisión registrada, con el rechazo como clase positiva. Una predicción positiva señala semejanza con solicitudes rechazadas; no demuestra insolvencia ni que el rechazo original fuera correcto.
 
-La unidad de análisis inicial es un registro identificado por `Ind_ID`, utilizado para unir las tablas y excluido de los predictores. No se acredita que cada identificador corresponda a una persona distinta, ni se conocen la cronología, el muestreo o la regla de decisión original. Por ello, el análisis no establece una política automática de concesión ni demuestra capacidad para anticipar impagos futuros.
+La unidad de análisis es el cliente identificado por `Ind_ID`, definido como `Client ID` en la fuente. Los 1.548 identificadores son únicos: hay una observación por cliente identificado y la clave se usa para unir y controlar, sin entrar al modelo. Clientes con claves diferentes pueden compartir atributos; esa coincidencia no se trata como duplicación del mismo cliente. No se conocen la cronología, el muestreo o la regla de decisión original. El análisis no establece una política automática de concesión ni demuestra capacidad para anticipar impagos futuros.
 
 ## Decisiones que guían el análisis
 
@@ -27,9 +27,9 @@ La unidad de análisis inicial es un registro identificado por `Ind_ID`, utiliza
 
 ## Evaluación y resultado esperado
 
-Se reserva aproximadamente el **20 % para el cierre** (310 registros) y se comparan candidatos mediante **cinco folds de validación cruzada** en los 1.238 registros de desarrollo. Los perfiles idénticos en los 17 atributos originales permanecen juntos: no se comparten entre desarrollo y test ni entre entrenamiento y validación. Son grupos de coincidencia, no identidades personales verificadas. La exploración inicial utiliza las 990 filas del entrenamiento del primer fold.
+Se reserva aleatoriamente el **20 % para test** (310 registros) y se comparan candidatos mediante **cinco folds aleatorios y estratificados** en los 1.238 registros de desarrollo. Se separan los identificadores de cliente, sin agrupar por atributos coincidentes. La estratificación mantiene aproximadamente la proporción de clases; semillas 42 y 43 fijan el reparto sin buscar una semilla favorable. La exploración inicial utiliza las 990 filas del entrenamiento del primer fold.
 
-El criterio principal es el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial es **0,5**. Se incluyen dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos comparten las mismas particiones y cada preparación se ajusta dentro de su entrenamiento.
+El criterio principal es el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial es **0,5**. Se incluyen dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos comparten las mismas particiones y cada preparación se ajusta dentro de su entrenamiento. Los tres modelos usan `class_weight="balanced"`, calculado por entrenamiento; las métricas se calculan sin ponderar observaciones. Se parte de la complejidad predeterminada: logística L2 con C=1, árbol sin profundidad máxima y bosque de 100 árboles, con mínimo una observación por hoja en ambos tipos de árbol. La ponderación no equivale a costes de negocio ni garantiza una mejora universal.
 
 Entre candidatos situados a no más de **0,01 de F1** del mejor, se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión entre folds y, después, mayor F1 medio. Esta regla limita la complejidad por diferencias pequeñas; no demuestra equivalencia estadística ni establece una mejora mínima útil para un banco. La explicación y las limitaciones de los candidatos se documentarán junto a la elección.
 
@@ -45,7 +45,7 @@ La exploración conserva los extremos sin error confirmado y las dos cantidades 
 
 Se convierten los días relativos en años, se separa el código especial de empleo y se añade un indicador de ingreso ausente. Se agrupan ocupaciones en seis familias, educación en tres niveles y vivienda en cuatro modalidades; las [correspondencias y sus límites](docs/Agrupaciones-categoricas.md) explican qué información se simplifica.
 
-Las categorías ausentes se representan explícitamente. Ingreso y edad se imputan con medianas aprendidas en entrenamiento. Para el código especial de empleo se utiliza duración cero como soporte de cálculo junto con su indicador, sin presentarlo como antigüedad observada. El pipeline reúne estas reglas, la codificación nominal y el escalado para logística. Los indicadores binarios permanecen en 0/1; para árboles se podrá desactivar el escalado.
+Las categorías ausentes se representan explícitamente. Ingreso y edad se imputan con medianas aprendidas en entrenamiento. Para el código especial de empleo se utiliza duración cero como soporte de cálculo junto con su indicador, sin presentarlo como antigüedad observada. El pipeline reúne estas reglas, la codificación nominal y el escalado para logística. Los indicadores binarios permanecen en 0/1; para árboles se desactiva el escalado.
 
 La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta una categoría futura no conocida. Esa tabla preparada sirve para diagnóstico; la comparación ajusta una copia nueva del pipeline en cada fold a partir de las entradas originales.
 
@@ -53,17 +53,17 @@ La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta u
 
 Medias de cinco folds, clase positiva rechazo y umbral 0,5; no son resultados de test:
 
-| Candidato | F1 medio | Desv. F1 | Recall | ROC-AUC | Accuracy |
-|---|---:|---:|---:|---:|---:|
-| Mayoritaria | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 |
-| Siempre rechazo | 0,203 | 0,000 | 1,000 | 0,500 | 0,113 |
-| Logística | 0,080 | 0,070 | 0,043 | 0,605 | 0,891 |
-| Árbol | 0,113 | 0,066 | 0,071 | 0,498 | 0,877 |
-| Random Forest | 0,103 | 0,094 | 0,057 | 0,646 | 0,890 |
+| Candidato | F1 medio | Desv. F1 | Precisión | Recall | ROC-AUC | Accuracy |
+|---|---:|---:|---:|---:|---:|---:|
+| Mayoritaria | 0,000 | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 |
+| Siempre rechazo | 0,203 | 0,000 | 0,113 | 1,000 | 0,500 | 0,113 |
+| Logística | 0,242 | 0,064 | 0,159 | 0,507 | 0,612 | 0,643 |
+| Árbol | 0,408 | 0,042 | 0,392 | 0,429 | 0,671 | 0,859 |
+| Random Forest | 0,520 | 0,115 | 0,630 | 0,450 | 0,743 | 0,907 |
 
-La accuracy cercana al 89 % oculta una detección muy baja: de 140 rechazos, logística identifica seis, árbol diez y bosque ocho. El árbol encabeza el F1 entre los modelos, pero ninguno supera la referencia de siempre rechazo; no se considera alcanzado un resultado suficiente. El bosque obtiene el mejor ROC-AUC, junto con una brecha importante entre entrenamiento y validación. Los [resultados por fold y errores](reports/README.md) y la [memoria](docs/Memoria-proyecto.md) desarrollan esta lectura.
+Random Forest queda como candidato provisional por su F1: detecta 63 de los 140 rechazos y genera 38 falsos rechazos. La logística detecta 71, pero genera 373 falsas alertas; el árbol detecta 60 y genera 94. Los tres superan por F1 medio la referencia de siempre rechazo, sin que ello demuestre utilidad bancaria.
 
-El siguiente bloque abordará la baja detección mediante mejoras acotadas en desarrollo, sin asumir que un ajuste del umbral mejora el ranking. El recorte P99 del ingreso y la exclusión de `CHILDREN` siguen pendientes de comparación. No se cambia el test ni se presenta una configuración inicial como modelo final.
+El bosque presenta F1 de entrenamiento 0,971 frente a 0,520 en validación; el árbol también muestra una brecha amplia. El siguiente bloque estudiará ajustes acotados de complejidad y los contrastes pendientes de P99 y exclusión de `CHILDREN`, sin seleccionar por test. Los [resultados por fold y errores](reports/README.md) y la [memoria](docs/Memoria-proyecto.md) desarrollan la interpretación. No hay modelo final ni evaluación de test.
 
 ## Recorrido y archivos
 

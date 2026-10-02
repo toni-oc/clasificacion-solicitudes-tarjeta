@@ -14,7 +14,7 @@ La sección **Fuentes y carga** importa las dos tablas de Kaggle y muestra sus d
 
 ### Correspondencia entre tablas
 
-En **Correspondencia entre tablas** se comprueba que las claves estén informadas y sean únicas en cada archivo. La unión externa validada uno a uno permite detectar tanto pérdidas como multiplicaciones de filas. Los 1.548 identificadores tienen correspondencia en ambas tablas; no quedan claves exclusivas de una fuente. El resultado contiene 19 columnas: identificador, 17 atributos candidatos y etiqueta. La unicidad de la clave no demuestra que todos los registros correspondan a personas diferentes. La vista de las cinco primeras filas de la tabla unida muestra atributos y etiqueta juntos, sin exponer el identificador.
+En **Correspondencia entre tablas** se comprueba que las claves estén informadas y sean únicas en cada archivo. La unión externa validada uno a uno permite detectar tanto pérdidas como multiplicaciones de filas. Los 1.548 identificadores tienen correspondencia en ambas tablas; no quedan claves exclusivas de una fuente. El resultado contiene 19 columnas: identificador, 17 atributos candidatos y etiqueta. La fuente define `Ind_ID` como identificador de cliente (`Client ID`). Se adopta una observación por cliente identificado, sin varias filas asociadas al mismo cliente según esa clave. Esta interpretación sigue la documentación y no equivale a verificar externamente la identidad de las personas. La vista de las cinco primeras filas de la tabla unida muestra atributos y etiqueta juntos, sin exponer el identificador.
 
 ### Primera lectura de los registros
 
@@ -48,33 +48,35 @@ Quedan otras 227 ausencias de ocupación en registros con días de empleo no pos
 
 Los 17 atributos originales, excluyendo identificador y etiqueta, forman 1.377 perfiles distintos. Se consideran iguales las ausencias en un mismo campo. Hay 150 perfiles repetidos, que reúnen 321 registros; 9 perfiles, con 22 registros, contienen tanto aprobaciones como rechazos.
 
-No se eliminan filas ni se sustituyen etiquetas: una coincidencia completa no confirma identidad personal ni demuestra qué decisión sería errónea. Las diferencias podrían depender de información ausente, de cambios no fechados o de errores cuya causa no se puede establecer. Como medida conservadora, todas las filas de un perfil permanecen juntas al separar muestras. Esto evita compartir perfiles exactos entre entrenamiento y evaluación, pero no identifica personas con atributos distintos.
+Se comprueba además que cada grupo contiene tantos identificadores distintos como registros. Las coincidencias corresponden a clientes diferentes según la clave disponible, no a varias observaciones del mismo cliente identificado. Se conservan filas y etiquetas; las discrepancias no demuestran cuál de las decisiones sería errónea ni que las coincidencias se deban necesariamente al azar.
+
+Si hubiera observaciones reiteradas de un cliente, habría que estudiar su dependencia y agrupar por ese cliente al evaluar entidades nuevas. Aquí se opta por reparto aleatorio de clientes identificados. Agrupar por atributos impondría evaluar solo perfiles exactos nunca vistos, una restricción adicional que no exige el objetivo. La coincidencia de perfiles queda como diagnóstico y no acredita por sí sola independencia o dependencia entre las personas.
 
 ### Campos para modelar
 
-Se excluye `Mobile_phone` por constancia y quedan 16 atributos candidatos. Se conservan los 1.548 registros. `Ind_ID` mantiene la alineación entre entradas y respuesta; el grupo de perfil solo controla el reparto. Ninguno entra como predictor. Los datos originales y la definición del perfil conservan el móvil.
+Se excluye `Mobile_phone` por constancia y quedan 16 atributos candidatos. Se conservan los 1.548 registros. `Ind_ID` mantiene la alineación entre entradas y respuesta; el grupo de perfil solo describe coincidencias y no condiciona el reparto. Ninguno entra como predictor. Los datos originales y la definición del perfil conservan el móvil.
 
 La disponibilidad temporal y la pertinencia de los demás campos siguen pendientes de acreditación. Mantenerlos como candidatos no significa que se haya decidido una selección definitiva ni que su uso sea adecuado para una política real de crédito.
 
 ### Reglas de evaluación
 
-Se fija F1 medio no ponderado entre cinco folds como criterio principal, con rechazo como clase positiva y umbral inicial 0,5. Se acompañará de dispersión entre folds, recall, precisión, ROC-AUC con puntuaciones y matrices de confusión. Las referencias serán predecir la clase mayoritaria del entrenamiento y predecir siempre rechazo; todavía no se han evaluado.
+Se fija F1 medio no ponderado entre cinco folds como criterio principal, con rechazo como clase positiva y umbral inicial 0,5. Se acompañará de dispersión entre folds, recall, precisión, ROC-AUC con puntuaciones y matrices de confusión. Las referencias serán predecir la clase mayoritaria del entrenamiento y predecir siempre rechazo; se calculan en la comparación inicial de modelos.
 
 Dentro de 0,01 de F1 del mejor resultado se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión y después mayor F1 medio. Es una regla práctica para limitar complejidad ante diferencias pequeñas, no una prueba de equivalencia estadística ni un coste de negocio. El ajuste de umbral, si se desarrolla, utilizará únicamente datos de desarrollo.
 
-### Reserva y validación por perfiles
+### Reserva y validación por clientes
 
-Se utiliza validación cruzada estratificada por grupos. Primero se reserva un bloque de cinco como test, con semilla 42; después se crean cinco folds en desarrollo, con semilla 43. Se mantiene el orden de la fuente para que la reproducción no dependa del orden resultante de la unión de tablas.
+Se reserva aleatoriamente el 20 % con `train_test_split`, estratificando por la etiqueta y fijando semilla 42. Dentro de desarrollo se crean cinco folds con `StratifiedKFold`, mezcla aleatoria y semilla 43. Se conserva el orden de entrada de la fuente y el devuelto por el reparto. No se buscan semillas según el resultado de los modelos.
 
-El reparto contiene 1.238 registros y 1.102 perfiles en desarrollo, con 140 rechazos; el test contiene 310 registros y 275 perfiles, con 35 rechazos. Cada validación tiene 247 o 248 registros y 28 rechazos. Se comprueba que los grupos no se compartan entre muestras, que cada registro de desarrollo valide una sola vez y que todos los entrenamientos y validaciones contengan ambas clases.
+Hay 1.238 registros de desarrollo y 310 de test, con 140 y 35 rechazos. Cada validación tiene 247 o 248 registros y 28 rechazos. Se comprueban identificadores separados, cobertura de cada registro de desarrollo una sola vez y ambas clases en todos los entrenamientos y validaciones. Pueden existir atributos iguales en muestras diferentes, sin compartir el identificador de cliente.
 
-La exploración siguiente utilizará los 990 registros del entrenamiento del primer fold, con 112 rechazos. Los tratamientos aprendidos se ajustarán de nuevo en cada entrenamiento al comparar candidatos. Las decisiones manuales que nazcan del análisis exploratorio pueden influir en la validación de desarrollo; un pipeline no convierte esa validación en una comprobación externa.
+La exploración utiliza los 990 registros del entrenamiento del primer fold, con 112 rechazos. Los tratamientos y los pesos de clase se vuelven a ajustar con cada entrenamiento al comparar modelos. Las decisiones manuales nacidas de la exploración pueden influir en la validación de desarrollo; el pipeline no elimina esa adaptación.
 
 ### Conservación de las particiones y alcance
 
 El [registro de evaluación](../evaluacion/README.md) conserva configuración, huellas de las fuentes y resúmenes agregados. La asignación por identificador, uso y fold se genera localmente y se comprueba en las ejecuciones posteriores para impedir un cambio inadvertido del reparto.
 
-El conjunto público ya ha sido examinado, por lo que los resultados futuros tendrán alcance de evaluación interna. No hay cronología para simular predicciones futuras, identidades personales verificadas ni una muestra externa. El número reducido de rechazos también limita la precisión con la que podrán interpretarse diferencias pequeñas.
+El protocolo se revisó después de análisis previos del conjunto. La nueva reserva puede contener registros utilizados anteriormente: entrenar desde cero evita reutilizar ajustes, pero no borra el conocimiento adquirido. El test actual queda apartado de la selección posterior, todavía sin evaluar; sus resultados tendrán alcance de evaluación interna, no de prueba completamente inédita. La falta de cronología, de un método documentado de muestreo y de una muestra externa limita la generalización, y el reducido número de rechazos aconseja cautela ante diferencias pequeñas.
 
 El bloque deja definidos los controles de calidad y el diseño de comparación, antes de aprender tratamientos o entrenar modelos. La siguiente sección explora entrenamiento y justifica la preparación numérica y las agrupaciones categóricas por su significado.
 
@@ -82,108 +84,102 @@ El bloque deja definidos los controles de calidad y el diseño de comparación, 
 
 ### Variables y representaciones para explorar
 
-La exploración utiliza los 990 registros del entrenamiento del primer fold, con 112 rechazos. Las muestras originales y sus asignaciones permanecen intactas. Los días de nacimiento y empleo se convierten en años aproximados, dividiendo por 365,25 y respetando la referencia temporal del archivo; no se utiliza la fecha de ejecución.
+La exploración utiliza los 990 registros del entrenamiento del primer fold, con 112 rechazos. Los días de nacimiento y empleo se convierten en años aproximados mediante 365,25 días por año, sin utilizar la fecha de ejecución. Las cinco cantidades, ocho categorías nominales y cinco indicadores se preparan en copias mediante funciones que no utilizan la respuesta.
 
-Se distinguen cinco cantidades, ocho categorías nominales y los indicadores binarios. El código positivo de empleo se separa en un indicador: sus 159 registros no aportan una duración laboral interpretable y quedan fuera de los gráficos de antigüedad. Las representaciones se calculan en copias mediante funciones que no utilizan la respuesta.
+El código positivo de empleo se representa por separado. Sus 166 registros no aportan antigüedad interpretable y quedan fuera de los gráficos de duración; no se convierten en cientos de años de empleo.
 
 ### Distribuciones, extremos y relaciones numéricas
 
-Los histogramas y frecuencias muestran un ingreso con cola derecha, edades entre 21,10 y 67,52 años y concentraciones en recuentos familiares pequeños. El límite exploratorio IQR del ingreso es 380.925; hay 50 registros por encima, incluidos dos de 1.575.000. Un registro tiene 14 hijos y 15 miembros de familia. Se revisan junto a su contexto, sin evidencia que permita declararlos errores. La preparación inicial conserva las filas y sus valores: ser excepcional no demuestra que un registro perjudique al modelo.
+Los histogramas muestran un ingreso con cola derecha y concentración en recuentos familiares pequeños. Hay 42 ingresos por encima del límite exploratorio IQR de 380.250, incluidos dos de 1.575.000. Aparece también un registro de 14 hijos y 15 miembros de familia. Se revisa su contexto y se conservan: la rareza no confirma un error ni demuestra que su eliminación mejore un modelo.
 
-Se comprueba el alcance de un posible límite P99 del ingreso: en este entrenamiento sería 599.220 y afectaría a diez registros, no solo a los dos máximos. El recorte no se aplica. Queda definido como una comparación posterior frente a conservar el ingreso: el límite se aprenderá dentro de cada entrenamiento y se aplicará sin recalcularlo en la validación correspondiente, conservando las filas. No se fijan topes para hijos o familia sin una regla de dominio que los respalde.
+El P99 del ingreso sería 495.000 y limitaría nueve registros. No se aplica; se reserva como contraste separado y su límite se aprenderá dentro de cada entrenamiento. Tampoco se fijan topes arbitrarios para hijos o familia.
 
-Los boxplots muestran medianas, no medias. La antigüedad mediana interpretable es 5,74 años en aprobaciones y 3,18 en rechazos, con solapamiento; ingreso y edad también se solapan. Cada gráfico indica cuántos valores informados utiliza y excluye las duraciones sin interpretar. El tamaño de la caja refleja el intervalo entre percentiles 25 y 75, no el número de registros. El gráfico del ingreso utiliza una escala logarítmica solo para visualizar; la entrada no se transforma.
+Los boxplots presentan medianas y solapamientos. La antigüedad mediana interpretable es 5,68 años en aprobaciones y 3,90 en rechazos; la edad, 42,09 y 47,27. El ingreso mediano es 166.500 y 157.500, respectivamente. Las cajas representan los percentiles 25–75, no el número de observaciones; cada gráfico incluye su tamaño disponible. El eje logarítmico del ingreso sirve solo para visualizar.
 
-Estas asociaciones describen decisiones históricas en entrenamiento. No prueban causalidad, no justifican pesos manuales para las variables y no bastan para descartar una aportación conjunta al modelo. La correlación de Spearman entre hijos y miembros de familia es 0,823; se estudia qué información comparten antes de reducir entradas.
+Estas asociaciones no prueban causalidad ni justifican pesos manuales. El Spearman entre hijos y tamaño familiar es 0,814; motiva estudiar redundancia, sin asumir que los campos sean intercambiables.
 
 ### Relación entre familia, hijos y estado civil
 
-Se calcula la diferencia `Family_Members − CHILDREN` únicamente para explorar su relación con el estado civil, el ingreso registrado y la etiqueta. Vale 1 en 245 registros y 2 en 745. Las categorías `Married` y `Civil marriage` aparecen con diferencia 2; separados y viudos, con diferencia 1. Entre los 157 registros de `Single / not married` hay 147 con diferencia 1 y diez con diferencia 2. La asociación es fuerte, pero no una equivalencia exacta ni una prueba de convivencia o número de perceptores de ingresos.
+Se explora `Family_Members − CHILDREN`, sin incorporarlo al pipeline. Vale 1 en 267 registros y 2 en 721, con tasas de rechazo del 12,36 % y 10,68 %. Los ingresos medianos son 168.750 y 162.000 sobre 262 y 712 valores informados. No se observa menor ingreso registrado en el primer grupo, pero tampoco se conocen los ingresos totales del hogar ni el número de perceptores.
 
-El rechazo es 29/245 (11,84 %) y 83/745 (11,14 %), respectivamente. Los ingresos medianos son 175.500 y 157.500, calculados sobre 237 y 735 ingresos informados. No se observa menor ingreso registrado en el primer grupo, y la proximidad de las tasas no acredita equivalencia estadística. Tampoco se pueden interpretar estas cifras como ingresos totales del hogar ni atribuir un efecto al divorcio.
+La diferencia está ligada al estado civil: separados y viudos aparecen con diferencia 1; casi todos los casados, con diferencia 2. Entre solteros aparecen ambas y un caso con diferencia 0. Los dos registros con diferencia 0 son las alertas de un hijo y un miembro de familia, uno casado y otro soltero. Ambos tienen rechazo; dos observaciones no permiten atribuir riesgo a esa discrepancia ni corregirla sin información adicional.
 
-La diferencia no se incorpora al pipeline: resume información disponible y muy vinculada al estado civil, sin una interpretación adicional suficientemente acreditada. Se mantienen ambas cantidades familiares en la referencia inicial. La simplificación concreta que se contrastará después es excluir `CHILDREN` conservando `Family_Members` y `Marital_status`. Se evaluará por separado del recorte del ingreso, frente al mismo modelo y particiones, para poder distinguir el efecto de cada cambio. Ninguna de las dos mejoras está implementada en la preparación ni evaluada predictivamente.
+Se mantienen las dos cantidades y el estado civil. Queda propuesto contrastar una variante sin `CHILDREN`, por separado del P99 y frente al mismo modelo y particiones. No se ha comprobado aún su utilidad predictiva.
 
 ### Categorías y agrupaciones con significado
 
-Se calculan frecuencias, número de rechazos y tasas para todas las categorías y los tres indicadores de contacto. Los gráficos se centran en ocupación, educación y vivienda; el [resumen completo](../reports/resumen_categorias_entrenamiento.csv) conserva los demás niveles. La tasa del 100 % de `IT staff` procede de solo dos registros, lo que ilustra el escaso respaldo de algunas categorías.
+Se calculan frecuencias, rechazos y tasas de las categorías y contactos. Los gráficos se centran en ocupación, educación y vivienda; el [resumen completo](../reports/resumen_categorias_entrenamiento.csv) conserva todos los niveles. `IT staff` tiene dos registros y ambos son rechazos, un respaldo insuficiente para generalizar esa tasa a la ocupación.
 
-Se adoptan agrupaciones semánticas, sin utilizar las tasas para decidir las fusiones. Ocupación pasa de 18 niveles informados a seis familias: administración y gestión (126), técnicas y profesionales (73), producción y transporte (228), ventas (84), servicios de apoyo (55) y personal general (119). `Core staff` se mantiene separado por su significado impreciso. Las familias no suponen equivalencia salarial ni una jerarquía de solvencia.
+Ocupación pasa de 18 niveles a seis familias semánticas: administración y gestión (119), técnicas y profesionales (68), producción y transporte (254), ventas (78), servicios de apoyo (51) y personal general (110). `Core staff` permanece separado por su significado impreciso. Las tasas de rechazo no determinan las fusiones ni las familias implican igualdad salarial o de solvencia.
 
-Educación pasa de cinco niveles a secundaria (688), superior completa (261) y superior incompleta (41). Se preserva la diferencia entre estudios superiores completados e incompletos, aunque se pierde detalle dentro de secundaria y entre grados superiores. La codificación posterior es nominal, sin imponer una relación de riesgo ordenada.
+Educación pasa de cinco niveles a secundaria (684), superior completa (264) y superior incompleta (42). Vivienda pasa de seis niveles a casa o apartamento (879), con familiares (55), alquiler declarado (18) e institucional o colectiva (38). Se mantiene el alquiler separado por significado; la categoría institucional reúne modalidades diferentes y su pérdida de detalle deberá valorarse.
 
-Vivienda pasa de seis niveles a casa o apartamento (884), con familiares (53), alquiler declarado (12) e institucional o colectiva (41). Esta última categoría reúne vivienda municipal, vinculada al trabajo y cooperativa; es una simplificación amplia cuya utilidad sigue pendiente de validación. No se interpreta toda modalidad minoritaria como alquiler ni casa/apartamento como propiedad. Las doce observaciones de alquiler permanecen separadas porque su significado es explícito.
-
-Las [correspondencias y justificaciones](Agrupaciones-categoricas.md) documentan también la información que se pierde. El estado civil, el tipo de ingreso, las tenencias y los contactos se conservan. Las tasas similares de los teléfonos en esta exploración no bastan por sí solas para descartar una posible contribución conjunta. Agrupar reduce fragmentación; todavía no demuestra una mejora predictiva.
+Las [correspondencias y justificaciones](Agrupaciones-categoricas.md) explican las simplificaciones. El estado civil, tipo de ingreso, tenencias y contactos se conservan. Reducir categorías está implementado, pero su ventaja frente a mantenerlas separadas aún no se ha contrastado.
 
 ### Ausencias y decisiones de tratamiento
 
-En entrenamiento faltan dos géneros, 18 ingresos, 16 nacimientos y 305 ocupaciones. Entre los ingresos ausentes hay siete rechazos (38,89 %), frente al 10,80 % entre los informados. Se incorpora un indicador de ausencia como hipótesis de representación, sin atribuir ocultación ni considerar demostrada su utilidad con tan pocos registros.
+Faltan seis géneros, 14 ingresos, 20 nacimientos y 310 ocupaciones. Entre los ingresos ausentes hay cinco rechazos (35,71 %), frente al 10,96 % entre los informados. Se incluye un indicador de ausencia como hipótesis, sin atribuir ocultación. Las tasas de grupos pequeños, como los cinco rechazos entre seis géneros ausentes, se interpretan con cautela.
 
-Ingreso y edad se imputan con medianas de entrenamiento: 162.000 y 42,401 años, respectivamente. La mediana evita que los ingresos extremos desplacen el valor de referencia; no supone que las cantidades desconocidas sean cero o pertenezcan al cuartil inferior. En esta muestra no se necesitan imputaciones de hijos ni miembros de familia.
+Ingreso y edad se imputan con medianas aprendidas en entrenamiento: 162.000 y 42,337 años. La mediana limita la influencia de ingresos extremos sobre la referencia de imputación, sin atribuir cero o un ingreso bajo a un dato desconocido. No se requieren imputaciones de hijos ni tamaño familiar.
 
-Las categorías desconocidas se representan con `__AUSENTE__`, sin asignar una profesión o género supuestos. De las 305 ocupaciones ausentes, 159 acompañan al código positivo de empleo y 146 no. El indicador de ese código permite distinguir ambos contextos aun compartiendo la categoría de ausencia.
-
-Para los 159 códigos especiales se utiliza una duración cero de soporte, acompañada del indicador. Ese cero permite el cálculo del modelo y no se presenta como antigüedad observada ni experiencia laboral total. Una duración desconocida sin ese código recibiría la mediana del entrenamiento; este segundo caso no aparece entre las ausencias actuales.
+Las categorías ausentes reciben `__AUSENTE__`. De las 310 ocupaciones ausentes, 166 acompañan al código positivo de empleo y 144 no. El indicador mantiene diferenciados ambos contextos. Para el código positivo se utiliza duración cero de soporte junto a ese indicador, sin interpretarla como antigüedad observada o experiencia total. Una duración desconocida sin ese código recibiría la mediana del entrenamiento.
 
 ### Preparación reutilizable
 
-El pipeline conecta representaciones, reglas fijas, imputación, codificación y escalado. Las funciones y correspondencias están en [preparacion.py](../src/preparacion.py); la construcción del pipeline permanece visible en el notebook. Las categorías se codifican con one-hot y los cinco indicadores binarios permanecen en 0/1. El escalado numérico queda preparado para logística y se podrá desactivar para árboles.
+El pipeline conecta representaciones, reglas fijas, imputación, one-hot y escalado. Las correspondencias están en [preparacion.py](../src/preparacion.py); su construcción permanece visible en el notebook. Los indicadores binarios conservan 0/1. Se escalan cantidades para logística y se desactiva ese paso para árbol y bosque.
 
-El ajuste realizado es un diagnóstico sobre el primer entrenamiento. Al comparar modelos se ajustará una copia nueva del pipeline en cada fold; no se enviará a validación una tabla preparada previamente con todo desarrollo. Las decisiones manuales del análisis exploratorio siguen formando parte del desarrollo y no convierten sus puntuaciones en una evaluación externa.
+La preparación de diagnóstico se ajusta solo con el primer entrenamiento. La comparación posterior clona y vuelve a ajustar todo el pipeline por fold; no utiliza una tabla previamente preparada con todo desarrollo.
 
 ### Comprobación del resultado y cierre
 
-La preparación produce 40 columnas numéricas y conserva las 990 filas con sus índices alineados. Se imputan los 18 ingresos y las 16 edades; los valores numéricos informados permanecen intactos antes del escalado, salvo la conversión de unidades y el tratamiento explícito del código de empleo. Los gráficos antes y después permiten observar el efecto de la imputación sin confundir los valores añadidos con observaciones reales.
+Se conservan las 990 filas y se producen 40 columnas numéricas. Se imputan 14 ingresos y 20 edades, manteniendo los valores informados antes del escalado y las conversiones explícitas. Los gráficos antes y después muestran el efecto de la imputación.
 
-Un ejemplo sintético combina una ocupación nueva con ingreso ausente. La preparación mantiene las columnas, activa el indicador de ausencia y codifica la ocupación desconocida con ceros en su bloque, sin reajustar estadísticas. Los [resúmenes de entrenamiento](../reports/README.md) conservan agrupaciones y medianas.
-
-No se modifican las particiones tras agrupar: coincidencias creadas por la simplificación no demuestran duplicidad de los registros originales. Las agrupaciones y el indicador de ingreso quedan implementados como preparación inicial, con su aportación predictiva pendiente de contraste. Esta preparación es el punto de partida de la comparación de modelos.
+Un ejemplo sintético combina ocupación nueva e ingreso ausente. Mantiene las columnas, activa el indicador y codifica la ocupación desconocida con ceros en su bloque, sin reajustar estadísticas. Los [informes](../reports/README.md) conservan frecuencias y medianas. Las coincidencias creadas por agrupar categorías no cambian la unidad de cliente ni las particiones. Los extremos y las dos cantidades familiares permanecen en la preparación inicial.
 
 ## Comparación inicial de modelos
 
 ### Condiciones de comparación
 
-Se comparan dos referencias y tres modelos en los 1.238 registros de desarrollo, con los cinco folds agrupados y estratificados fijados previamente. La clase positiva sigue siendo el rechazo registrado. Se conserva el umbral 0,5 y el F1 medio no ponderado entre folds como criterio principal. No se usan los 310 registros de test para entrenar, comparar o interpretar errores de este bloque.
+Se utilizan los 1.238 registros de desarrollo y los cinco folds aleatorios y estratificados ya fijados. Cada cliente se valida una vez, con umbral 0,5. El criterio principal es el F1 medio no ponderado entre folds de la clase rechazo. Los 310 registros de test no se utilizan para entrenar, comparar modelos o interpretar sus errores.
 
 ### Referencias y modelos candidatos
 
-La referencia mayoritaria predice la clase más frecuente de cada entrenamiento; la segunda predice siempre rechazo. Permiten contextualizar resultados elevados de accuracy o recall que no requieren aprender relaciones entre atributos.
+La referencia mayoritaria predice la clase más frecuente del entrenamiento y la segunda predice siempre rechazo. Contextualizan accuracy y recall elevados que pueden alcanzarse sin aprender relaciones entre atributos.
 
-La logística utiliza L2 con C=1 y escalado numérico. El árbol limita su profundidad a cinco y exige al menos cinco registros por hoja. Random Forest utiliza 200 árboles, mínimo dos registros por hoja, selección de atributos por raíz cuadrada y ninguna profundidad máxima fija. Árbol y bosque no escalan las cantidades. Se usa una configuración inicial por modelo, sin ponderación de clases, conservando extremos, agrupaciones y ambas cantidades familiares. No se consideran configuraciones óptimas ni se atribuye a una decisión de preparación una mejora todavía no comparada.
+Los tres modelos usan `class_weight="balanced"`: cada entrenamiento calcula pesos inversos a la frecuencia de sus clases, de modo que la suma de pesos de ambas clases sea igual. No se duplican filas, no se altera la prevalencia de validación y las métricas se calculan sin aplicar esos pesos. Es una decisión inicial ante el desbalance, no una garantía de mejora ni una estimación de costes bancarios.
+
+La logística utiliza la regularización L2 predeterminada con C=1, solver `lbfgs` y escalado numérico. Se permite un máximo de 2.000 iteraciones para converger. El árbol y el bosque mantienen profundidad máxima no limitada y mínimo una observación por hoja; Random Forest utiliza sus 100 árboles predeterminados y selección de atributos por raíz cuadrada. Se fija semilla 42 en ambos estimadores y no se escalan sus cantidades. Son referencias iniciales sin búsqueda de hiperparámetros: limitar su crecimiento se estudiará a partir de su generalización.
 
 ### Entrenamiento y validación comunes
 
-La [rutina de evaluación](../src/evaluacion.py) crea una copia nueva de cada candidato en cada fold. El pipeline aprende imputaciones, codificación y, en logística, escalado únicamente con su entrenamiento. La tabla preparada durante la exploración no se reutiliza como entrada general. Este orden coincide con la [separación entre ajuste y transformación recomendada por scikit-learn](https://scikit-learn.org/stable/common_pitfalls.html#how-to-avoid-data-leakage).
-
-Se ejecutan 25 ajustes y se obtiene una predicción de validación por registro y candidato. Se comprueban cobertura, alineación y conservación de los grupos. Las plantillas permanecen sin ajustar: no se entrega el modelo de un fold ni se reajusta todavía con todo desarrollo. La adaptación manual durante el análisis exploratorio y el conocimiento previo del conjunto mantienen el alcance de evaluación interna.
+La [rutina de evaluación](../src/evaluacion.py) clona y ajusta cada candidato en cada fold. Imputación, codificación, escalado y pesos de clase se aprenden exclusivamente con ese entrenamiento. Se realizan 25 ajustes y se guarda una predicción de validación por cliente y candidato, comprobando cobertura, alineación e identificadores separados. Las plantillas permanecen sin ajustar; no se selecciona el modelo de un fold ni se reajusta todavía con todo desarrollo.
 
 ### Resultados y estabilidad
 
-Las métricas siguientes son medias entre folds; la desviación del F1 es muestral, no un intervalo de confianza. La precisión sin predicciones positivas se registra como cero por convenio.
+Las métricas son medias entre folds. La desviación del F1 es muestral, no un intervalo de confianza. Se registra precisión cero por convenio si un candidato no predice rechazos.
 
 | Candidato | F1 validación | Desv. F1 | Precisión | Recall | ROC-AUC | Accuracy | F1 entrenamiento |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Mayoritaria | 0,000 | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 | 0,000 |
 | Siempre rechazo | 0,203 | 0,000 | 0,113 | 1,000 | 0,500 | 0,113 | 0,203 |
-| Logística | 0,080 | 0,070 | 0,700 | 0,043 | 0,605 | 0,891 | 0,098 |
-| Árbol | 0,113 | 0,066 | 0,296 | 0,071 | 0,498 | 0,877 | 0,343 |
-| Random Forest | 0,103 | 0,094 | 0,600 | 0,057 | 0,646 | 0,890 | 0,704 |
+| Logística | 0,242 | 0,064 | 0,159 | 0,507 | 0,612 | 0,643 | 0,297 |
+| Árbol | 0,408 | 0,042 | 0,392 | 0,429 | 0,671 | 0,859 | 0,973 |
+| Random Forest | 0,520 | 0,115 | 0,630 | 0,450 | 0,743 | 0,907 | 0,971 |
 
-La referencia mayoritaria alcanza 88,69 % de accuracy sin detectar rechazos. Ningún modelo supera el F1 de siempre rechazo, que a su vez rechaza todas las aprobaciones registradas. Por tanto, ninguna configuración inicial proporciona todavía un resultado satisfactorio.
+Los tres modelos superan por F1 medio la referencia de siempre rechazo (0,203). La mayoría obtiene 88,69 % de accuracy sin detectar rechazos, por lo que esa cifra aislada sería insuficiente. El bosque encabeza F1 y ROC-AUC; logística detecta más rechazos, a costa de muchas más falsas alertas.
 
-Todos los modelos tienen algún fold con F1 cero. El bosque presenta F1 entre 0 y 0,25, con una brecha amplia entre entrenamiento y validación; el árbol también pierde rendimiento. Esto aconseja revisar generalización y complejidad, sin identificar una única causa. La logística tiene F1 bajo incluso al entrenar: atribuir todos los resultados débiles al sobreajuste sería incorrecto. El mejor ROC-AUC del bosque no se traduce en buena detección al umbral inicial.
+El F1 del bosque varía de 0,381 a 0,681 entre folds. Su F1 de entrenamiento es 0,971 frente a 0,520 en validación; en el árbol son 0,973 y 0,408. Las brechas justifican estudiar regularización y estabilidad. La logística presenta 0,297 y 0,242: los límites de los candidatos no responden todos al mismo patrón.
 
 ### Lectura de los errores
 
-Las matrices agregadas contienen 1.098 aprobaciones y 140 rechazos registrados, cada uno evaluado fuera de su entrenamiento correspondiente. La logística detecta seis rechazos y genera un falso rechazo; el árbol detecta diez y genera 22; el bosque detecta ocho y genera cuatro. Quedan sin detectar 134, 130 y 132 rechazos, respectivamente.
+Las predicciones de validación reúnen 1.098 aprobaciones y 140 rechazos, sin que cada cliente haya participado en el entrenamiento que lo evalúa. Logística detecta 71 rechazos y produce 373 falsos rechazos; árbol detecta 60 y produce 94; bosque detecta 63 y produce 38. Quedan sin detectar 69, 80 y 77 rechazos, respectivamente.
 
-El problema común es la detección escasa con umbral 0,5. Una precisión relativamente alta no compensa por sí sola ese resultado. Las métricas calculadas sobre las matrices agregadas pueden diferir de las medias entre folds: por ejemplo, la logística tiene precisión agregada 6/7, mientras que la tabla recoge la media por fold de 0,700. Ninguno de estos errores equivale directamente a impago, ahorro o perjuicio económico observado.
+El bosque ofrece el mejor equilibrio inicial por F1, pero deja muchos rechazos sin detectar. La logística alcanza mayor recall con más aprobaciones clasificadas como rechazo. No se conocen los costes necesarios para convertir ese intercambio en una decisión bancaria. Las métricas de las matrices agregadas pueden diferir de las medias por fold; ninguna de ellas mide impagos o pérdidas observados.
 
 ### Elección provisional y siguientes mejoras
 
-El árbol encabeza el F1 entre los modelos. La diferencia con el bosque es 0,01027, ligeramente superior a la tolerancia de 0,01, por lo que queda como configuración provisional para continuar comparando. Esa regla no acredita superioridad estadística y no convierte al árbol en modelo aceptado: su F1 sigue por debajo de la referencia de siempre rechazo.
+Random Forest queda como candidato provisional. Los demás modelos están a más de 0,01 de su F1 medio, por lo que la preferencia por una familia más sencilla no cambia la elección. Superar las referencias no acredita utilidad para una política de crédito ni superioridad estadística definitiva.
 
-El diagnóstico justifica estudiar ponderación o ajuste de umbral en desarrollo para abordar la detección, distinguiendo cambios en las decisiones de cambios en el ranking. El bosque mantiene interés por su ROC-AUC, con su brecha de generalización pendiente de revisión. El P99 del ingreso y la exclusión de `CHILDREN` continúan como contrastes separados frente a una referencia común. No se ha implementado ninguna de esas mejoras ni se promete que produzcan una ganancia.
+La siguiente fase estudiará ajustes acotados de complejidad y contrastará por separado el P99 del ingreso y la exclusión de `CHILDREN`. Un eventual ajuste de umbral utilizará solo desarrollo. La ponderación ya forma parte de la comparación inicial; no se han ejecutado estas mejoras, reajustado el modelo final ni evaluado test.
 
-Se conservan [configuraciones, métricas por fold y errores agregados](../reports/README.md). Las predicciones individuales quedan en local. No se evalúa test ni se declara un modelo final; las mejoras seleccionadas constituyen la siguiente fase.
+Se conservan [configuraciones, métricas por fold y errores agregados](../reports/README.md). El reparto y las configuraciones se han revisado conjuntamente; estos resultados describen el protocolo vigente y no aíslan el efecto causal de cada cambio. El conocimiento previo del conjunto mantiene el alcance de evaluación interna.

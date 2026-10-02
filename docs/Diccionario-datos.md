@@ -4,7 +4,7 @@ Definiciones resumidas de la [fuente de Kaggle](https://www.kaggle.com/datasets/
 
 | Campo | Significado y unidad o dominio | Papel inicial |
 |---|---|---|
-| `Ind_ID` | Identificador de cliente según la fuente; no acredita identidad única de una persona. | Unión y control; excluido como predictor. |
+| `Ind_ID` | Identificador de cliente (`Client ID`) según la fuente; 1.548 valores únicos, una observación por cliente identificado. | Unión y control; excluido como predictor. |
 | `GENDER` | Género registrado; categorías de la fuente. | Candidato sujeto a revisión de pertinencia. |
 | `Car_Owner` | Tenencia de automóvil. | Categoría candidata. |
 | `Propert_Owner` | Tenencia de propiedad. | Categoría candidata. |

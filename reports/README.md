@@ -13,7 +13,7 @@ La [justificación de las agrupaciones](../docs/Agrupaciones-categoricas.md) exp
 
 ## Comparación inicial de modelos
 
-Los siguientes informes se regeneran en la sección «Comparación inicial de modelos». Utilizan los cinco folds de los **1.238 registros de desarrollo**, con umbral 0,5 y la preparación ajustada dentro de cada entrenamiento. No incluyen una evaluación de test.
+Los siguientes informes se regeneran en la sección «Comparación inicial de modelos». Utilizan los cinco folds de los **1.238 registros de desarrollo**, con reparto aleatorio estratificado por cliente, umbral 0,5 y preparación ajustada dentro de cada entrenamiento. Los tres modelos utilizan clases ponderadas (`balanced`), con pesos aprendidos por entrenamiento; las métricas no aplican esos pesos. No incluyen una evaluación de test.
 
 | Archivo | Contenido |
 |---|---|

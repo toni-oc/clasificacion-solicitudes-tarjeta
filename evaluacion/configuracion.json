@@ -1,7 +1,4 @@
 {
-  "separador": "StratifiedGroupKFold",
-  "bloques_reserva": 5,
-  "bloque_test": 0,
   "semilla_test": 42,
   "folds_desarrollo": 5,
   "semilla_cv": 43,
@@ -47,7 +44,7 @@
     "Credit_card.csv": "09a6c906ba5d36daf81fddbd386cb35376cdd194837d9d0885aa4dc4cbe4e3aa",
     "Credit_card_label.csv": "b6932c1553de915e7595524280b88ec69bf94a5ae37c3d640c43610f9a576337"
   },
-  "orden_entrada": "Orden de Ind_ID en Credit_card.csv; grupos numerados por primera aparición, con ausencias incluidas",
+  "orden_entrada": "Orden de Ind_ID en Credit_card.csv; se conserva el orden devuelto por train_test_split",
   "entorno": {
     "python": "3.13.2",
     "pandas": "3.0.3",
@@ -78,5 +75,12 @@
     "menor desviación de F1 entre folds",
     "mayor F1 medio"
   ],
-  "alcance": "Evaluación interna sobre datos públicos ya examinados; sin validación externa ni temporal acreditada"
+  "alcance": "Evaluación interna tras revisar el protocolo con conocimiento previo del conjunto; nuevo test sin evaluar, no completamente inédito ni externo",
+  "separador_test": "train_test_split",
+  "fraccion_test": 0.2,
+  "estratificacion_test": "label",
+  "separador_desarrollo": "StratifiedKFold",
+  "unidad_reparto": "Cliente identificado por Ind_ID; una fila por identificador",
+  "agrupar_perfiles": false,
+  "columnas_perfil_uso": "Diagnóstico descriptivo; no condiciona las particiones ni entra al modelo"
 }

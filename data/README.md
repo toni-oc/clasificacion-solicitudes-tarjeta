@@ -7,7 +7,7 @@ Descargar `Credit_card.csv` y `Credit_card_label.csv` desde [Credit card Details
 | `raw/Credit_card.csv` | Identificador y atributos del solicitante. |
 | `raw/Credit_card_label.csv` | Identificador y decisión histórica: 0 = aprobación; 1 = rechazo. |
 
-El notebook une las tablas por `Ind_ID`, comprueba una relación uno a uno y detiene el recorrido si encuentra claves ausentes, repetidas o sin correspondencia. El [diccionario](../docs/Diccionario-datos.md) detalla los campos.
+La fuente define `Ind_ID` como identificador de cliente (`Client ID`). Hay 1.548 identificadores únicos: se trabaja con una observación por cliente identificado. El notebook une las tablas por esa clave, comprueba una relación uno a uno y detiene el recorrido si encuentra claves ausentes, repetidas o sin correspondencia. El [diccionario](../docs/Diccionario-datos.md) detalla los campos.
 
 El [inventario](inventario_fuentes.json) conserva tamaños y SHA-256 de los archivos utilizados. Permite identificar la descarga de referencia; una descarga distinta requiere revisar sus diferencias antes de comparar resultados. Los originales se mantienen intactos y los CSV de esta carpeta están excluidos de Git. El notebook conserva una vista acotada de atributos sin mostrar `Ind_ID`, además de resúmenes agregados.
 

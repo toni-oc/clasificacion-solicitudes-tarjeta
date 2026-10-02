@@ -1,53 +1,53 @@
 Variable,Nivel,Registros,Rechazos,Rechazo (%)
-GENDER,F,626,59,9.424920127795527
-GENDER,M,362,52,14.3646408839779
-GENDER,,2,1,50.0
-Car_Owner,N,596,63,10.570469798657719
-Car_Owner,Y,394,49,12.436548223350254
-Propert_Owner,N,340,44,12.941176470588236
-Propert_Owner,Y,650,68,10.461538461538462
-Type_Income,Commercial associate,238,35,14.705882352941176
-Type_Income,Pensioner,164,23,14.024390243902438
-Type_Income,State servant,73,4,5.47945205479452
-Type_Income,Working,515,50,9.70873786407767
+GENDER,F,614,62,10.09771986970684
+GENDER,M,370,45,12.162162162162161
+GENDER,,6,5,83.33333333333333
+Car_Owner,N,603,75,12.437810945273633
+Car_Owner,Y,387,37,9.560723514211887
+Propert_Owner,N,344,43,12.5
+Propert_Owner,Y,646,69,10.681114551083592
+Type_Income,Commercial associate,228,29,12.719298245614034
+Type_Income,Pensioner,172,29,16.86046511627907
+Type_Income,State servant,79,4,5.063291139240507
+Type_Income,Working,511,50,9.784735812133073
 EDUCATION,Academic degree,1,0,0.0
-EDUCATION,Higher education,260,32,12.307692307692308
-EDUCATION,Incomplete higher,41,1,2.4390243902439024
-EDUCATION,Lower secondary,14,3,21.428571428571427
-EDUCATION,Secondary / secondary special,674,76,11.275964391691394
-Marital_status,Civil marriage,68,4,5.882352941176471
-Marital_status,Married,667,71,10.644677661169416
-Marital_status,Separated,55,4,7.2727272727272725
-Marital_status,Single / not married,157,27,17.197452229299362
-Marital_status,Widow,43,6,13.953488372093023
-Housing_type,Co-op apartment,3,2,66.66666666666667
-Housing_type,House / apartment,884,93,10.520361990950226
-Housing_type,Municipal apartment,34,12,35.294117647058826
-Housing_type,Office apartment,4,0,0.0
-Housing_type,Rented apartment,12,1,8.333333333333334
-Housing_type,With parents,53,4,7.547169811320755
-Type_Occupation,Accountants,30,4,13.333333333333334
-Type_Occupation,Cleaning staff,14,1,7.142857142857143
-Type_Occupation,Cooking staff,14,4,28.571428571428573
-Type_Occupation,Core staff,119,14,11.764705882352942
-Type_Occupation,Drivers,60,7,11.666666666666666
-Type_Occupation,HR staff,3,0,0.0
-Type_Occupation,High skill tech staff,45,4,8.88888888888889
+EDUCATION,Higher education,263,33,12.547528517110266
+EDUCATION,Incomplete higher,42,4,9.523809523809524
+EDUCATION,Lower secondary,12,4,33.333333333333336
+EDUCATION,Secondary / secondary special,672,71,10.56547619047619
+Marital_status,Civil marriage,64,3,4.6875
+Marital_status,Married,648,67,10.339506172839506
+Marital_status,Separated,65,11,16.923076923076923
+Marital_status,Single / not married,166,26,15.662650602409638
+Marital_status,Widow,47,5,10.638297872340425
+Housing_type,Co-op apartment,3,1,33.333333333333336
+Housing_type,House / apartment,879,93,10.580204778156997
+Housing_type,Municipal apartment,30,10,33.333333333333336
+Housing_type,Office apartment,5,1,20.0
+Housing_type,Rented apartment,18,3,16.666666666666668
+Housing_type,With parents,55,4,7.2727272727272725
+Type_Occupation,Accountants,23,3,13.043478260869565
+Type_Occupation,Cleaning staff,11,1,9.090909090909092
+Type_Occupation,Cooking staff,15,3,20.0
+Type_Occupation,Core staff,110,13,11.818181818181818
+Type_Occupation,Drivers,62,6,9.67741935483871
+Type_Occupation,HR staff,1,0,0.0
+Type_Occupation,High skill tech staff,40,4,10.0
 Type_Occupation,IT staff,2,2,100.0
-Type_Occupation,Laborers,162,23,14.197530864197532
-Type_Occupation,Low-skill Laborers,6,2,33.333333333333336
-Type_Occupation,Managers,86,10,11.627906976744185
-Type_Occupation,Medicine staff,26,0,0.0
-Type_Occupation,Private service staff,12,0,0.0
+Type_Occupation,Laborers,186,18,9.67741935483871
+Type_Occupation,Low-skill Laborers,6,1,16.666666666666668
+Type_Occupation,Managers,88,9,10.227272727272727
+Type_Occupation,Medicine staff,26,3,11.538461538461538
+Type_Occupation,Private service staff,9,0,0.0
 Type_Occupation,Realty agents,1,0,0.0
-Type_Occupation,Sales staff,83,6,7.228915662650603
+Type_Occupation,Sales staff,77,8,10.38961038961039
 Type_Occupation,Secretaries,7,0,0.0
-Type_Occupation,Security staff,12,2,16.666666666666668
-Type_Occupation,Waiters/barmen staff,3,0,0.0
-Type_Occupation,,305,33,10.819672131147541
-Work_Phone,0,768,86,11.197916666666666
-Work_Phone,1,222,26,11.711711711711711
-Phone,0,675,76,11.25925925925926
-Phone,1,315,36,11.428571428571429
-EMAIL_ID,0,897,101,11.259754738015607
-EMAIL_ID,1,93,11,11.827956989247312
+Type_Occupation,Security staff,13,3,23.076923076923077
+Type_Occupation,Waiters/barmen staff,3,1,33.333333333333336
+Type_Occupation,,310,37,11.935483870967742
+Work_Phone,0,787,88,11.181702668360865
+Work_Phone,1,203,24,11.822660098522167
+Phone,0,695,81,11.654676258992806
+Phone,1,295,31,10.508474576271187
+EMAIL_ID,0,904,104,11.504424778761061
+EMAIL_ID,1,86,8,9.30232558139535
