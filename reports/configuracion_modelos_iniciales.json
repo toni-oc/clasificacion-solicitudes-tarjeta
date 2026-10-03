@@ -4,16 +4,6 @@
   "umbral": 0.5,
   "preparacion": "sección 3; sin recorte ni selección familiar; escalado solo para logística",
   "parametros": {
-    "Mayoritaria": {
-      "constant": null,
-      "random_state": null,
-      "strategy": "prior"
-    },
-    "Siempre rechazo": {
-      "constant": 1,
-      "random_state": null,
-      "strategy": "constant"
-    },
     "Logística": {
       "C": 1.0,
       "class_weight": "balanced",
@@ -24,7 +14,7 @@
       "max_iter": 2000,
       "n_jobs": null,
       "penalty": "deprecated",
-      "random_state": null,
+      "random_state": 42,
       "solver": "lbfgs",
       "tol": 0.0001,
       "verbose": 0,
@@ -34,7 +24,7 @@
       "ccp_alpha": 0.0,
       "class_weight": "balanced",
       "criterion": "gini",
-      "max_depth": null,
+      "max_depth": 5,
       "max_features": null,
       "max_leaf_nodes": null,
       "min_impurity_decrease": 0.0,

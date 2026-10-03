@@ -1,0 +1,4 @@
+Escenario,Coste_FP,Coste_FN,Logística,Árbol,Random Forest,Random Forest ajustado
+Igual coste,100,100,10100,8600,2300,2800
+FN cinco veces,100,500,16900,16600,9100,10000
+FN diez veces,100,1000,25400,26600,17600,19000

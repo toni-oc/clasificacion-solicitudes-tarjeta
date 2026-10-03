@@ -24,9 +24,9 @@ Definiciones resumidas de la [fuente de Kaggle](https://www.kaggle.com/datasets/
 | `Family_Members` | Número de miembros de la familia. | Recuento candidato. |
 | `label` | 0 = aprobación registrada; 1 = rechazo registrado. | Objetivo binario; clase positiva 1. |
 
-De los 17 atributos distintos de la clave y la etiqueta, quedan 16 entradas **candidatas** tras excluir el móvil constante; no son una selección definitiva. Ninguno cuenta con una fecha que acredite su disponibilidad antes de la decisión. Una categoría laboral o educativa no prueba solvencia, y el código positivo de empleo no permite concluir por sí solo la situación económica concreta.
+De los 17 atributos distintos de la clave y la etiqueta, se conservaron **16 entradas en la preparación final** tras excluir el móvil constante. Ninguno cuenta con una fecha que acredite su disponibilidad antes de la decisión. Una categoría laboral o educativa no prueba solvencia, y el código positivo de empleo no permite concluir por sí solo la situación económica concreta.
 
-La [preparación inicial](Agrupaciones-categoricas.md) aplica agrupaciones de significado, conversiones a años, categorías ausentes explícitas y medianas aprendidas en entrenamiento. Los extremos se conservan. Su utilidad predictiva y una selección posterior de entradas siguen pendientes de comparación.
+La preparación aplica [agrupaciones de significado](Agrupaciones-categoricas.md), conversiones a años, categorías ausentes explícitas y medianas aprendidas en entrenamiento. Se contrastaron combinaciones de recorte de extremos, exclusión de hijos y logaritmo del ingreso; ninguna alcanzó la mejora mínima fijada en F1. Por ello, el modelo final conserva los extremos y ambas cantidades familiares. Los [resultados de esos contrastes](../reports/comparacion_preparaciones.csv) no aíslan la contribución de cada entrada ni demuestran que las agrupaciones superen las categorías originales.
 
 ## Representaciones derivadas
 

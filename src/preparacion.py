@@ -1,4 +1,44 @@
-"""Representaciones y agrupaciones fijas; no aprenden estadísticas ni usan label."""
+"""Reglas de preparación y transformaciones opcionales del modelo."""
+
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
+
+
+class LimitarExtremos(TransformerMixin, BaseEstimator):
+    """Aprende límites de ingreso y familia; conserva filas y ausencias."""
+
+    def __init__(self, cuantil=0.99):
+        self.cuantil = cuantil
+
+    def fit(self, X, y=None):
+        if not 0 < self.cuantil <= 1:
+            raise ValueError("El cuantil debe estar entre 0 y 1, excluido 0.")
+        self.limites_ = X[["Annual_income", "Family_Members"]].quantile(self.cuantil)
+        # Un tamaño familiar discreto se limita a un valor observado, sin fracciones.
+        self.limites_["Family_Members"] = X["Family_Members"].quantile(
+            self.cuantil, interpolation="higher",
+        )
+        if self.limites_.isna().any():
+            raise ValueError("Faltan valores informados para aprender los límites.")
+        return self
+
+    def transform(self, X):
+        check_is_fitted(self, "limites_")
+        salida = X.copy()
+        columnas = self.limites_.index
+        salida[columnas] = salida[columnas].clip(upper=self.limites_, axis="columns")
+        return salida
+
+
+def transformar_ingreso_log(X):
+    """Sustituye la representación del ingreso por log(1 + ingreso), sin imputar."""
+    if X["Annual_income"].dropna().lt(0).any():
+        raise ValueError("La transformación requiere ingresos no negativos.")
+    salida = X.copy()
+    salida["Annual_income"] = np.log1p(salida["Annual_income"])
+    return salida
+
 
 NUMERICAS = ["Annual_income", "CHILDREN", "Family_Members", "Edad_anios", "Antiguedad_anios"]
 CATEGORICAS = [

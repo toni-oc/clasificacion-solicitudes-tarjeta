@@ -60,10 +60,6 @@
     "matriz de confusión",
     "accuracy descriptiva"
   ],
-  "referencias": [
-    "clase mayoritaria del entrenamiento",
-    "siempre clase 1"
-  ],
   "umbral_inicial": 0.5,
   "tolerancia_simplicidad_f1": 0.01,
   "prioridad_familias_en_tolerancia": [
@@ -75,12 +71,13 @@
     "menor desviación de F1 entre folds",
     "mayor F1 medio"
   ],
-  "alcance": "Evaluación interna tras revisar el protocolo con conocimiento previo del conjunto; nuevo test sin evaluar, no completamente inédito ni externo",
+  "alcance": "Evaluación interna tras revisar el protocolo con conocimiento previo del conjunto; test apartado del ajuste y de la selección posteriores, no completamente inédito ni externo",
   "separador_test": "train_test_split",
   "fraccion_test": 0.2,
   "estratificacion_test": "label",
   "separador_desarrollo": "StratifiedKFold",
   "unidad_reparto": "Cliente identificado por Ind_ID; una fila por identificador",
   "agrupar_perfiles": false,
-  "columnas_perfil_uso": "Diagnóstico descriptivo; no condiciona las particiones ni entra al modelo"
+  "columnas_perfil_uso": "Diagnóstico descriptivo; no condiciona las particiones ni entra al modelo",
+  "referencia_para_mejoras": "Random Forest inicial con la preparación y las particiones vigentes"
 }

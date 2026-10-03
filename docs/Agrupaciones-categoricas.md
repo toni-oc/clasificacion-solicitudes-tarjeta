@@ -1,8 +1,8 @@
 # Agrupaciones categóricas
 
-Las reglas se apoyan en la exploración de entrenamiento. Los recuentos mostrados corresponden a las 990 filas del primer fold de las particiones vigentes. Reducen la fragmentación de categorías por significado, sin utilizar la tasa de rechazo como criterio de fusión. Son una representación inicial cuya utilidad predictiva aún no está validada; no constituyen una clasificación acreditada de riesgo, ingresos o solvencia.
+Las reglas se apoyan en la exploración de entrenamiento. Los recuentos mostrados corresponden a las 990 filas del primer fold de las particiones vigentes. Reducen la fragmentación de categorías por significado, sin utilizar la tasa de rechazo como criterio de fusión. Se utilizaron en los modelos evaluados, pero no se aisló su ventaja frente a las categorías originales; no constituyen una clasificación acreditada de riesgo, ingresos o solvencia.
 
-Las correspondencias exactas se muestran en el [notebook](../notebooks/01-analisis-y-modelado.ipynb) y en [agrupaciones_categoricas.csv](../reports/agrupaciones_categoricas.csv). El código reutilizable está en [preparacion.py](../src/preparacion.py).
+Las correspondencias exactas se muestran en el [notebook](../notebooks/clasificacion-solicitudes-tarjeta.ipynb) y en [agrupaciones_categoricas.csv](../reports/agrupaciones_categoricas.csv). El código reutilizable está en [preparacion.py](../src/preparacion.py).
 
 ## Ocupación
 
@@ -34,10 +34,10 @@ Se usa codificación nominal. Las agrupaciones no introducen una escala numéric
 
 La última agrupación es una simplificación con incertidumbre semántica, que podrá revisarse si pierde información útil. No se denomina alquiler a modalidades cuyo régimen de tenencia no está acreditado. Tampoco se impone un tamaño mínimo común: las dieciocho observaciones de alquiler conservan su categoría.
 
-## Ausencias, niveles nuevos y comparación pendiente
+## Ausencias, niveles nuevos y alcance de la comparación
 
 Una categoría ausente se representa como `__AUSENTE__`. En las variables agrupadas, un valor informado que no figure en el diccionario se marca como `__NO_RECONOCIDA__`; no se confunde con una ausencia. El codificador ignora niveles no aprendidos, dejándolos con ceros en el bloque correspondiente. Se verifica este comportamiento mediante un ejemplo sintético de ocupación nueva.
 
 Las frecuencias completas están en el [resumen original](../reports/resumen_categorias_entrenamiento.csv) y el [resumen agrupado](../reports/resumen_agrupaciones_entrenamiento.csv). Las coincidencias que pueda crear esta simplificación no demuestran que los registros originales fueran duplicados. Se mantienen las particiones aleatorias por cliente identificado; las agrupaciones categóricas no cambian el reparto.
 
-La comparación predictiva posterior deberá valorar el intercambio entre menor fragmentación y pérdida de detalle. Los tamaños o tasas descriptivas de estos grupos no demuestran por sí solos una mejora del modelo.
+La comparación entre categorías originales y agrupadas quedó fuera de los contrastes realizados. Su posible ventaja sigue siendo una limitación del análisis cerrado, no un resultado demostrado por los tamaños o las tasas descriptivas de estos grupos.

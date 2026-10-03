@@ -1,6 +1,6 @@
 # Diseño de evaluación
 
-La [configuración](configuracion.json) fija fuentes, orden, semillas y reglas de comparación. El [notebook](../notebooks/01-analisis-y-modelado.ipynb) reproduce las particiones con los CSV originales y las versiones de [requirements.txt](../requirements.txt), sin necesitar archivos del curso.
+La [configuración](configuracion.json) fija fuentes, orden, semillas y reglas de comparación. El [notebook](../notebooks/clasificacion-solicitudes-tarjeta.ipynb) reproduce las particiones con los CSV originales y las versiones de [requirements.txt](../requirements.txt), sin necesitar archivos del curso.
 
 ## Unidad y reparto
 
@@ -29,6 +29,6 @@ Todos los candidatos utilizan las mismas particiones. Las estadísticas de prepa
 
 La exploración detallada utiliza el entrenamiento del primer fold. Las decisiones manuales derivadas de ella pueden influir en la validación de desarrollo; un pipeline no elimina esa adaptación.
 
-El protocolo se revisó después de explorar el conjunto y comparar configuraciones. El nuevo reparto puede reservar registros ya utilizados en análisis anteriores: reajustar los modelos desde cero evita reutilizar sus ajustes, pero no borra el conocimiento previo del conjunto. El test actual queda apartado del entrenamiento y la selección posteriores, todavía sin evaluar. Su resultado será una evaluación interna tras revisar el protocolo, no una comprobación completamente inédita, externa o temporal.
+El protocolo se revisó después de explorar el conjunto y comparar configuraciones. El nuevo reparto puede reservar registros ya utilizados en análisis anteriores: reajustar los modelos desde cero evita reutilizar sus ajustes, pero no borra el conocimiento previo del conjunto. El test se ha evaluado después de fijar la propuesta y reajustar únicamente con desarrollo. Sus resultados y la decisión previa se conservan en los [informes de cierre](../reports/README.md). Sigue siendo una evaluación interna tras revisar el protocolo, no una comprobación completamente inédita, externa o temporal.
 
 Los tamaños y la estratificación no acreditan representatividad de otro banco, periodo o población. La falta de fechas, del método de muestreo y de una política documentada de aprobación permanece como limitación.

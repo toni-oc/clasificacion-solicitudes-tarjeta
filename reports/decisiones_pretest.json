@@ -1,0 +1,139 @@
+{
+  "fijado_antes_de_test_utc": "2026-10-03T18:25:55.289569+00:00",
+  "modelo_principal": "Random Forest ajustado",
+  "umbral": 0.5,
+  "clase_positiva": 1,
+  "regla": "Puntuacion_1 >= umbral",
+  "preparacion": "Actual: sin recortes, sin logaritmo y conservando CHILDREN",
+  "parametros": {
+    "Logística": {
+      "C": 1.0,
+      "class_weight": "balanced",
+      "dual": false,
+      "fit_intercept": true,
+      "intercept_scaling": 1,
+      "l1_ratio": 0.0,
+      "max_iter": 2000,
+      "n_jobs": null,
+      "penalty": "deprecated",
+      "random_state": 42,
+      "solver": "lbfgs",
+      "tol": 0.0001,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "Árbol": {
+      "ccp_alpha": 0.0,
+      "class_weight": "balanced",
+      "criterion": "gini",
+      "max_depth": 5,
+      "max_features": null,
+      "max_leaf_nodes": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "random_state": 42,
+      "splitter": "best"
+    },
+    "Random Forest": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": "balanced",
+      "criterion": "gini",
+      "max_depth": null,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "Random Forest ajustado": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": "balanced",
+      "criterion": "gini",
+      "max_depth": null,
+      "max_features": 0.5,
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    }
+  },
+  "columnas_entrada": [
+    "GENDER",
+    "Car_Owner",
+    "Propert_Owner",
+    "CHILDREN",
+    "Annual_income",
+    "Type_Income",
+    "EDUCATION",
+    "Marital_status",
+    "Housing_type",
+    "Birthday_count",
+    "Employed_days",
+    "Work_Phone",
+    "Phone",
+    "EMAIL_ID",
+    "Type_Occupation",
+    "Family_Members"
+  ],
+  "filas_desarrollo": 1238,
+  "filas_test": 310,
+  "sha256_particiones": "5b8a300cdc2c1bd376caf1fd2ae2cbb551e88365448f35a88f66fcb5ff47c5ee",
+  "sha256_fuentes": {
+    "Credit_card.csv": "09a6c906ba5d36daf81fddbd386cb35376cdd194837d9d0885aa4dc4cbe4e3aa",
+    "Credit_card_label.csv": "b6932c1553de915e7595524280b88ec69bf94a5ae37c3d640c43610f9a576337"
+  },
+  "sha256_preparacion": "6d3b9e3bab7f4ad47975e2ae5f1e307117704590ec74b5b6f652fff43c6dce77",
+  "segmentos": [
+    "Ingreso informado/ausente",
+    "Código de empleo ordinario/positivo"
+  ],
+  "escenarios_euros_hipoteticos": [
+    {
+      "Escenario": "Igual coste",
+      "Coste_FP": 100,
+      "Coste_FN": 100
+    },
+    {
+      "Escenario": "FN cinco veces",
+      "Coste_FP": 100,
+      "Coste_FN": 500
+    },
+    {
+      "Escenario": "FN diez veces",
+      "Coste_FP": 100,
+      "Coste_FN": 1000
+    }
+  ],
+  "ejemplos": "Primeras cinco posiciones de test, sin seleccionar por etiqueta o acierto",
+  "versiones": {
+    "scikit-learn": "1.9.0",
+    "pandas": "3.0.3",
+    "numpy": "2.4.6",
+    "joblib": "1.5.3"
+  },
+  "alcance": "Evaluación interna del conjunto conocido; no validación externa",
+  "regla_cierre": "No cambiar modelo, preparación, hiperparámetros o umbral por los resultados de test"
+}

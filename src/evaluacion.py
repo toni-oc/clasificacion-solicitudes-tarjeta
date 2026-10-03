@@ -6,6 +6,18 @@ from sklearn.base import clone
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 
 
+def clasificar_puntuaciones(puntuaciones, umbral=0.5):
+    """La igualdad con el umbral pertenece a la clase positiva."""
+    return (np.asarray(puntuaciones) >= umbral).astype(int)
+
+
+def puntuar_f1(estimador, X, y, umbral=0.5):
+    """Scorer de búsqueda con la misma regla que la evaluación por folds."""
+    positiva = list(estimador.classes_).index(1)
+    pred = clasificar_puntuaciones(estimador.predict_proba(X)[:, positiva], umbral)
+    return f1_score(y, pred, zero_division=0)
+
+
 def evaluar_candidatos(candidatos, X, y, particiones, umbral=0.5):
     """Reajusta cada pipeline por fold y devuelve métricas y predicciones de validación.
 
@@ -30,8 +42,10 @@ def evaluar_candidatos(candidatos, X, y, particiones, umbral=0.5):
             prob = ajuste.predict_proba(X.iloc[va])[:, positiva]
             if not np.isfinite(prob).all() or ((prob < 0) | (prob > 1)).any():
                 raise ValueError("Puntuaciones de validación no válidas.")
-            pred = (prob >= umbral).astype(int)
-            pred_train = (ajuste.predict_proba(X.iloc[tr])[:, positiva] >= umbral).astype(int)
+            pred = clasificar_puntuaciones(prob, umbral)
+            pred_train = clasificar_puntuaciones(
+                ajuste.predict_proba(X.iloc[tr])[:, positiva], umbral,
+            )
             real = y.iloc[va]
             resultados.append({
                 "Modelo": nombre, "Fold": fold, "N_train": len(tr), "N_valid": len(va),

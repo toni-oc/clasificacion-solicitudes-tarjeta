@@ -1,98 +1,104 @@
-# Clasificación de solicitudes de tarjeta
+# Clasificación de solicitudes de tarjeta de crédito
 
-Análisis de solicitudes de tarjeta de crédito mediante modelos de clasificación, con atención a la interpretación de los datos, los errores de predicción y la claridad del procedimiento. Proyecto de portfolio desarrollado a partir de la práctica de clasificación del curso JYTS.
+Simulación del análisis de solicitudes de tarjeta en un departamento de admisión de crédito. Se comparan regresión logística, árbol de decisión y Random Forest, interpretando los datos y los errores en su contexto de negocio.
 
-**Estado:** objetivo, datos, calidad, preparación y comparación inicial implementados. Se evalúan dos referencias y tres modelos en cinco folds de desarrollo. Con clases ponderadas y umbral 0,5, Random Forest encabeza el F1 medio (0,520). El proyecto continúa en mejora, sin modelo final ni evaluación de test.
+El proyecto está terminado. La evaluación final muestra tanto el rendimiento obtenido como una conclusión relevante: el ajuste de hiperparámetros mejoró ligeramente la validación, pero **no superó al bosque inicial en F1 de test**.
 
-[Notebook](notebooks/01-analisis-y-modelado.ipynb) · [Memoria](docs/Memoria-proyecto.md) · [Datos y descarga](data/README.md)
+[Ver notebook](notebooks/clasificacion-solicitudes-tarjeta.ipynb) · [Resultados](#resultados) · [Cómo ejecutarlo](#ejecución) · [Datos y descarga](data/README.md)
 
-## Problema y alcance
+## Problema y datos
 
-En admisión de crédito, aceptar una operación problemática puede producir pérdidas, mientras que rechazar una solicitud adecuada puede reducir ingresos y oportunidades. El proyecto estudia qué información aportan los atributos personales, laborales y financieros al análisis de solicitudes y cómo comparar modelos considerando ambos tipos de error.
+En admisión de crédito, aceptar una operación problemática puede generar pérdidas y rechazar una solicitud adecuada puede suponer perder negocio. El análisis compara la capacidad de los modelos para distinguir solicitudes, considerando tanto la detección de rechazos como las falsas alertas sobre aprobaciones.
 
-La fuente disponible registra **decisiones históricas**, no impagos observados: `label = 0` significa aprobación y `label = 1`, rechazo. El objetivo técnico es clasificar esa decisión registrada, con el rechazo como clase positiva. Una predicción positiva señala semejanza con solicitudes rechazadas; no demuestra insolvencia ni que el rechazo original fuera correcto.
+Los datos proceden de [Credit card Details Binary Classification Problem, publicado por Rohit Udageri en Kaggle](https://www.kaggle.com/datasets/rohitudageri/credit-card-details). Se unen dos archivos por `Ind_ID`:
 
-La unidad de análisis es el cliente identificado por `Ind_ID`, definido como `Client ID` en la fuente. Los 1.548 identificadores son únicos: hay una observación por cliente identificado y la clave se usa para unir y controlar, sin entrar al modelo. Clientes con claves diferentes pueden compartir atributos; esa coincidencia no se trata como duplicación del mismo cliente. No se conocen la cronología, el muestreo o la regla de decisión original. El análisis no establece una política automática de concesión ni demuestra capacidad para anticipar impagos futuros.
-
-## Decisiones que guían el análisis
-
-| Cuestión | Criterio de trabajo |
+| Archivo | Contenido |
 |---|---|
-| Ausencias y situación laboral | Interpretar códigos y contextos antes de imputar. Una ausencia no demuestra ocultación ni desempleo. Los tratamientos estadísticos se ajustarán con entrenamiento. |
-| Categorías poco frecuentes | Agrupaciones de ocupación, educación y vivienda documentadas por significado y cobertura en entrenamiento. Su mejora predictiva está pendiente de comparación. No se impone un mínimo común de registros. |
-| Variables numéricas | Distinguir códigos especiales, errores y extremos plausibles. Contrastar límites o transformaciones cuando estén justificados, sin fijar de antemano medias, medianas o percentiles. |
-| Desbalance y capacidad de revisión | Comparar detección de rechazos y falsas alertas sobre aprobaciones. La accuracy será descriptiva y no decidirá el ganador. La capacidad real de revisión se desconoce. |
-| Explicabilidad y pertinencia | Examinar reglas, contribución de variables y errores relevantes. Las asociaciones no prueban causalidad, equidad o legitimidad de uso de atributos personales. |
-| Consecuencias económicas | Explorar escenarios explícitos de coste de errores. Serán supuestos de decisión, no pérdidas por impago ni ahorros bancarios observados. |
+| `Credit_card.csv` | Identificador y atributos personales, laborales y financieros. |
+| `Credit_card_label.csv` | Identificador y decisión registrada: **0 = aprobación; 1 = rechazo**. |
 
-## Evaluación y resultado esperado
+Hay **1.548 clientes identificados**, con **175 rechazos (11,30 %)**. La fuente define `Ind_ID` como identificador de cliente y sus valores son únicos. Se utiliza para unir y comprobar las tablas, sin incluirlo como predictor. Las coincidencias de atributos entre identificadores distintos se conservan.
 
-Se reserva aleatoriamente el **20 % para test** (310 registros) y se comparan candidatos mediante **cinco folds aleatorios y estratificados** en los 1.238 registros de desarrollo. Se separan los identificadores de cliente, sin agrupar por atributos coincidentes. La estratificación mantiene aproximadamente la proporción de clases; semillas 42 y 43 fijan el reparto sin buscar una semilla favorable. La exploración inicial utiliza las 990 filas del entrenamiento del primer fold.
+El objetivo técnico es clasificar la **decisión histórica**, con el rechazo como clase positiva. La etiqueta no registra impagos ni demuestra que la decisión original fuera correcta. Por ello, el proyecto no acredita capacidad para anticipar morosidad ni establece una política de concesión. El [diccionario de datos](docs/Diccionario-datos.md) recoge el significado y los límites de cada campo.
 
-El criterio principal es el **F1 medio no ponderado entre folds de la clase rechazo**, acompañado de su dispersión, recall, precisión, ROC-AUC calculado con puntuaciones y matrices de confusión. El umbral inicial es **0,5**. Se incluyen dos referencias —clase mayoritaria del entrenamiento y siempre rechazo—, regresión logística, árbol de decisión y Random Forest. Todos comparten las mismas particiones y cada preparación se ajusta dentro de su entrenamiento. Los tres modelos usan `class_weight="balanced"`, calculado por entrenamiento; las métricas se calculan sin ponderar observaciones. Se parte de la complejidad predeterminada: logística L2 con C=1, árbol sin profundidad máxima y bosque de 100 árboles, con mínimo una observación por hoja en ambos tipos de árbol. La ponderación no equivale a costes de negocio ni garantiza una mejora universal.
+## Criterios de negocio y preparación
 
-Entre candidatos situados a no más de **0,01 de F1** del mejor, se priorizarán logística, árbol y bosque, en ese orden. Dentro de una familia se preferirá menor dispersión entre folds y, después, mayor F1 medio. Esta regla limita la complejidad por diferencias pequeñas; no demuestra equivalencia estadística ni establece una mejora mínima útil para un banco. La explicación y las limitaciones de los candidatos se documentarán junto a la elección.
-
-Se compararán pocas mejoras justificadas, incluidas alternativas a las agrupaciones iniciales, transformaciones o variables derivadas y una búsqueda de hiperparámetros que permita bosques de distintas capacidades. Los resultados de validación orientarán la elección; la evaluación de cierre no se utilizará para cambiarla. La ganancia mínima útil y los costes reales no están establecidos.
-
-El conjunto público ya ha sido examinado durante el desarrollo. Repartirlo de nuevo no crea una prueba independiente: las métricas se presentarán como **evaluación interna**, con validación en datos nuevos pendiente. El [registro de evaluación](evaluacion/README.md) conserva el procedimiento, la configuración y los tamaños de las muestras. Los ajustes de umbral, si se realizan, se decidirán solo en desarrollo.
-
-La entrega prevista incluirá una tabla comparativa, interpretación de errores, justificación del modelo elegido, escenarios de coste y cinco ejemplos de evaluación seleccionados con una regla explícita. Esos ejemplos ilustrarán predicciones, no una implantación en producción.
-
-## Preparación inicial
-
-La exploración conserva los extremos sin error confirmado y las dos cantidades familiares como referencia inicial. Quedan propuestos dos contrastes separados: limitar el ingreso al P99 aprendido en entrenamiento y excluir el número de hijos conservando el tamaño familiar y el estado civil. La diferencia familia–hijos se explora, pero no se añade al modelo. Estas variantes todavía no se han aplicado ni evaluado predictivamente.
-
-Se convierten los días relativos en años, se separa el código especial de empleo y se añade un indicador de ingreso ausente. Se agrupan ocupaciones en seis familias, educación en tres niveles y vivienda en cuatro modalidades; las [correspondencias y sus límites](docs/Agrupaciones-categoricas.md) explican qué información se simplifica.
-
-Las categorías ausentes se representan explícitamente. Ingreso y edad se imputan con medianas aprendidas en entrenamiento. Para el código especial de empleo se utiliza duración cero como soporte de cálculo junto con su indicador, sin presentarlo como antigüedad observada. El pipeline reúne estas reglas, la codificación nominal y el escalado para logística. Los indicadores binarios permanecen en 0/1; para árboles se desactiva el escalado.
-
-La preparación produce 40 columnas en el entrenamiento inspeccionado y acepta una categoría futura no conocida. Esa tabla preparada sirve para diagnóstico; la comparación ajusta una copia nueva del pipeline en cada fold a partir de las entradas originales.
-
-## Resultados iniciales de desarrollo
-
-Medias de cinco folds, clase positiva rechazo y umbral 0,5; no son resultados de test:
-
-| Candidato | F1 medio | Desv. F1 | Precisión | Recall | ROC-AUC | Accuracy |
-|---|---:|---:|---:|---:|---:|---:|
-| Mayoritaria | 0,000 | 0,000 | 0,000 | 0,000 | 0,500 | 0,887 |
-| Siempre rechazo | 0,203 | 0,000 | 0,113 | 1,000 | 0,500 | 0,113 |
-| Logística | 0,242 | 0,064 | 0,159 | 0,507 | 0,612 | 0,643 |
-| Árbol | 0,408 | 0,042 | 0,392 | 0,429 | 0,671 | 0,859 |
-| Random Forest | 0,520 | 0,115 | 0,630 | 0,450 | 0,743 | 0,907 |
-
-Random Forest queda como candidato provisional por su F1: detecta 63 de los 140 rechazos y genera 38 falsos rechazos. La logística detecta 71, pero genera 373 falsas alertas; el árbol detecta 60 y genera 94. Los tres superan por F1 medio la referencia de siempre rechazo, sin que ello demuestre utilidad bancaria.
-
-El bosque presenta F1 de entrenamiento 0,971 frente a 0,520 en validación; el árbol también muestra una brecha amplia. El siguiente bloque estudiará ajustes acotados de complejidad y los contrastes pendientes de P99 y exclusión de `CHILDREN`, sin seleccionar por test. Los [resultados por fold y errores](reports/README.md) y la [memoria](docs/Memoria-proyecto.md) desarrollan la interpretación. No hay modelo final ni evaluación de test.
-
-## Recorrido y archivos
-
-El notebook se desarrollará en seis secciones: **objetivo y datos; calidad y evaluación; exploración y preparación; comparación inicial de modelos; mejoras seleccionadas; evaluación e interpretación**.
-
-| Ruta | Contenido actual |
+| Cuestión | Decisión aplicada y motivo |
 |---|---|
-| [notebooks/01-analisis-y-modelado.ipynb](notebooks/01-analisis-y-modelado.ipynb) | Cuatro secciones ejecutadas, hasta comparación inicial de modelos. Mejoras y cierre pendientes. |
-| [docs/Memoria-proyecto.md](docs/Memoria-proyecto.md) | Decisiones y conclusiones del recorrido implementado. |
-| [docs/Diccionario-datos.md](docs/Diccionario-datos.md) | Significado, papel y límites de los campos. |
-| [docs/Agrupaciones-categoricas.md](docs/Agrupaciones-categoricas.md) | Criterios semánticos, cobertura y límites de las agrupaciones iniciales. |
-| [src/preparacion.py](src/preparacion.py) | Conversiones, indicadores y agrupaciones reutilizables, sin estadísticas aprendidas fuera del pipeline. |
-| [src/evaluacion.py](src/evaluacion.py) | Rutina común que clona, entrena y evalúa candidatos en los folds fijados. |
-| [reports/README.md](reports/README.md) | Diagnóstico de entrenamiento y comparación de modelos: métricas, errores agregados y configuraciones. |
-| [data/README.md](data/README.md) e [inventario](data/inventario_fuentes.json) | Obtención y huellas de los archivos utilizados. Los CSV se conservan localmente en `data/raw/` y están excluidos de Git. |
-| [evaluacion/README.md](evaluacion/README.md) | Configuración y resúmenes de las particiones. La asignación individual se genera localmente y queda excluida de Git. |
-| [requirements.txt](requirements.txt) | Dependencias de la sección implementada. Se ampliarán cuando el código las necesite. |
+| Ausencias y situación laboral | Se distingue el código especial de empleo de una antigüedad real. Una ocupación ausente no se interpreta automáticamente como desempleo u ocultación. Las categorías ausentes se representan explícitamente y se conserva el contexto laboral. |
+| Ingresos, edad y extremos | Se convierten los días relativos en años y se imputan ingreso y edad con medianas de entrenamiento. La rareza no basta para borrar registros: se conservan los extremos y se contrastan recortes y transformaciones. El ingreso registrado no se interpreta como ingreso total del hogar. |
+| Categorías poco frecuentes | Se agrupan ocupación, educación y vivienda por significados compatibles, sin equiparar categorías solo por tener pocos casos ni atribuirles la misma solvencia. Las [agrupaciones](docs/Agrupaciones-categoricas.md) documentan la simplificación; no se ha aislado su ventaja frente a las categorías originales. |
+| Desbalance y errores | Los modelos iniciales ponderan las clases durante el entrenamiento. Se valoran F1, recall y precisión de los rechazos; la accuracy queda como complemento. Las métricas no se ponderan y los pesos no representan costes bancarios. |
+| Explicabilidad y pertinencia | Se comparan modelos de distinta complejidad y se muestran importancias del bosque. Estas describen el ajuste, sin explicar cada rechazo, demostrar causalidad o acreditar equidad y pertinencia del uso de atributos personales. |
+| Consecuencias económicas | Se presentan escenarios de coste de falsos rechazos y rechazos omitidos. Los importes son hipotéticos: no representan pérdidas por impago, ahorros observados ni una capacidad real de revisión. |
 
-Los ejemplos de predicción y los artefactos de modelos se incorporarán cuando se desarrollen esas fases.
+La preparación reúne conversiones, indicadores, imputación y codificación dentro de un pipeline. Las cantidades se escalan para logística; los árboles trabajan sin ese escalado. Cada ajuste aprende sus estadísticas únicamente con el entrenamiento correspondiente.
+
+## Comparación y selección
+
+Se reservan **310 registros para test (20 %)**. Los **1.238 de desarrollo** se comparan mediante cinco particiones de validación cruzada estratificada, comunes a todos los candidatos. Se separan identificadores de cliente, permitiendo atributos coincidentes; las semillas quedan fijadas sin buscarlas por sus resultados. El [diseño de evaluación](evaluacion/README.md) detalla el reparto.
+
+La selección utiliza el **F1 medio de la clase rechazo**, con umbral **0,5**, acompañado de dispersión, precisión, recall, ROC-AUC y matrices de confusión. Dentro de un punto porcentual del mejor F1 se prioriza logística, árbol y bosque, en ese orden; dentro de una familia, menor dispersión y después mayor F1. Es una regla práctica de comparación, no una prueba de equivalencia ni un criterio de rentabilidad.
+
+El recorrido del notebook mantiene seis secciones:
+
+1. **Objetivo y datos:** carga, unión de las tablas e interpretación de la etiqueta.
+2. **Calidad y evaluación:** códigos, ausencias, perfiles coincidentes y particiones.
+3. **Exploración y preparación:** distribuciones, relaciones y tratamientos justificados.
+4. **Comparación inicial de modelos:** métricas, brecha entre entrenamiento y validación y errores.
+5. **Contrastes de preparación:** cuatro combinaciones de recorte al P99 de ingreso y familia, exclusión de hijos y logaritmo del ingreso. Ninguna alcanza la mejora mínima de un punto de F1; se conserva la preparación inicial.
+6. **Optimización y evaluación final:** Grid Search de 36 configuraciones de Random Forest, elección en desarrollo y evaluación de los cuatro candidatos en test, seguida de interpretación y conclusiones.
+
+El bosque ajustado se selecciona por su F1 de desarrollo: **53,18 % frente a 52,04 %** del inicial. Mantiene 100 árboles, profundidad sin límite, una observación mínima por hoja, `max_features=0.5` y clases ponderadas. Se fijan modelo y umbral antes de test y se reajustan los cuatro pipelines con todo desarrollo. La búsqueda no garantiza una mejora fuera de esas particiones.
+
+## Resultados
+
+**Evaluación sobre los mismos 310 clientes de test**, con 35 rechazos y umbral 0,5. Las métricas se muestran en porcentaje; ROC-AUC utiliza las puntuaciones, no las clases predichas.
+
+| Modelo | F1 | Precisión | Recall | ROC-AUC | Accuracy |
+|---|---:|---:|---:|---:|---:|
+| Logística | 26,28 % | 17,65 % | 51,43 % | 68,70 % | 67,42 % |
+| Árbol | 25,86 % | 18,52 % | 42,86 % | 64,97 % | 72,26 % |
+| Random Forest | 61,02 % | 75,00 % | 51,43 % | 84,88 % | 92,58 % |
+| Random Forest ajustado | 54,84 % | 62,96 % | 48,57 % | 86,05 % | 90,97 % |
+
+El ajustado, elegido en desarrollo, detecta **17 de 35 rechazos**, omite 18 y genera 10 falsos rechazos. El bosque inicial detecta 18, omite 17 y genera 6 falsas alertas. La ventaja del ajustado en validación **no se confirma en F1 de test**, aunque obtiene mayor ROC-AUC. Se informa de este resultado conservando la selección previa, sin utilizar test para volver a elegir un ganador.
+
+El notebook completa la lectura con matrices de confusión, tres escenarios económicos hipotéticos y cinco ejemplos tomados por posición, sin elegirlos por acierto. Los cinco resultan ser aprobaciones; ilustran la salida del modelo y no sustituyen el balance completo de errores. Las [métricas finales](reports/metricas_test.csv), los [recuentos de errores](reports/errores_test.csv) y la [configuración de cierre](reports/evaluacion_final.json) conservan la evidencia.
+
+## Alcance y límites
+
+- El conjunto público ya se había examinado antes de fijar el protocolo. El cierre es una **evaluación interna**, no una validación externa o completamente inédita; el test reservado no interviene en la selección posterior.
+- Faltan fechas, muestreo documentado, regla de aprobación y momento de disponibilidad de los atributos. Tampoco hay costes reales ni evidencia de impacto económico.
+- Solo hay 35 rechazos en test: un caso cambia el recall en 2,86 puntos. La brecha entre entrenamiento y validación del bosque sigue siendo amplia; no se considera resuelto el sobreajuste.
+- Las agrupaciones y otros supuestos de representación no se han contrastado individualmente en su totalidad. Los resultados no acreditan un óptimo global ni generalización a otro banco o población.
+
+**La entrega es un análisis reproducible, sin recomendar aprobación o rechazo automáticos.** Una investigación posterior necesitaría evidencia independiente para justificar mejoras; este test ya consultado no constituye una reserva desconocida.
+
+## Archivos del proyecto
+
+| Ruta | Función |
+|---|---|
+| [notebooks/clasificacion-solicitudes-tarjeta.ipynb](notebooks/clasificacion-solicitudes-tarjeta.ipynb) | Recorrido completo: código, visualizaciones, decisiones y conclusiones. |
+| `docs/` | [Diccionario de datos](docs/Diccionario-datos.md) y [criterios de agrupación](docs/Agrupaciones-categoricas.md). |
+| [data/README.md](data/README.md) | Descarga y colocación de los CSV; el [inventario](data/inventario_fuentes.json) identifica los archivos utilizados. |
+| `src/` | Funciones de [preparación](src/preparacion.py) y [evaluación](src/evaluacion.py) utilizadas por el notebook. |
+| [evaluacion/](evaluacion/README.md) | Configuración y resúmenes de las particiones. |
+| [reports/](reports/README.md) | Métricas, diagnósticos y configuraciones guardadas. |
+| [models/](models/README.md) | Instrucciones del pipeline entrenado, generado localmente al ejecutar el cierre. |
+| [requirements.txt](requirements.txt) | Versiones de las dependencias utilizadas. |
+
+Los CSV originales se descargan en `data/raw/`. Los datos, las asignaciones individuales, las predicciones por cliente y los modelos entrenados están excluidos de Git; se generan o conservan localmente. El notebook sí contiene vistas acotadas de datos y cinco ejemplos, sin mostrar el identificador.
 
 ## Ejecución
 
-Entorno utilizado: **Python 3.13.2**. Desde la raíz del repositorio:
+Entorno utilizado: **Python 3.13.2**. Desde la raíz del repositorio, crear un entorno:
 
 ```bash
 python -m venv .venv
 ```
 
-En Windows:
+Instalar las dependencias en Windows:
 
 ```powershell
 .venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -104,12 +110,15 @@ En macOS/Linux:
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-1. Descargar los dos CSV y situarlos en `data/raw/`, siguiendo las [instrucciones de datos](data/README.md).
-2. Abrir el notebook en VS Code con soporte Jupyter, o en un entorno Jupyter compatible, y seleccionar el Python del entorno creado.
-3. Reiniciar el kernel y ejecutar las celdas en orden. La carga admite como directorio de trabajo la raíz del repositorio o `notebooks/`.
+1. Descargar `Credit_card.csv` y `Credit_card_label.csv` desde [Kaggle](https://www.kaggle.com/datasets/rohitudageri/credit-card-details) y colocarlos en `data/raw/`. Las [instrucciones de datos](data/README.md) detallan la descarga y sus límites.
+2. Abrir el notebook con VS Code y soporte Jupyter, o con un entorno Jupyter compatible. Seleccionar como kernel el Python de `.venv`.
+3. Reiniciar el kernel y ejecutar todas las celdas en orden. El directorio de trabajo debe ser la raíz del repositorio o `notebooks/`; las rutas se resuelven dentro del proyecto, sin carpetas personales.
+4. Consultar los resultados en el notebook y en `reports/`. El cierre guarda también el pipeline en `models/clasificador-solicitudes.joblib`; su [guía de uso](models/README.md) explica cómo cargarlo sin entrenar de nuevo.
 
-La ejecución de las cuatro secciones implementadas se comprueba en Windows; no se ha comprobado otra plataforma. No se necesitan cuentas bancarias, claves de API ni acceso al curso para ejecutar el código con los CSV descargados.
+La ejecución escribe los informes locales y el modelo; conserva los CSV de entrada y comprueba las particiones si ya existen. Repetirla verifica reproducibilidad, sin convertir el test en una nueva evaluación independiente. La ejecución completa se ha comprobado en Windows con las versiones indicadas; no se ha verificado en macOS/Linux.
 
-## Fuente
+## Procedencia
 
-Datos: [Credit card Details Binary Classification Problem](https://www.kaggle.com/datasets/rohitudageri/credit-card-details), de Rohit Udageri. La ficha declara CC0; la procedencia y los límites se recogen en [datos](data/README.md). El planteamiento procede de la práctica P09 del curso JYTS; el repositorio contiene el desarrollo del proyecto, sin incorporar los materiales originales del curso.
+El planteamiento del proyecto parte de una práctica del módulo de clasificación del curso "**De 0 a Data Scientist: Python, Machine Learning y Negocio"**, de **Jorge C. Rella**. Se presenta como una simulación analítica, sin atribuir resultados a una implantación bancaria real ni incorporar los materiales originales del curso.
+
+Los datos los publica Rohit Udageri en Kaggle. La [documentación de datos](data/README.md) conserva la consulta de licencia, procedencia y limitaciones de la fuente.

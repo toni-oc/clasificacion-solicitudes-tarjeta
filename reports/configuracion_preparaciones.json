@@ -1,0 +1,54 @@
+{
+  "evaluacion": "../evaluacion/configuracion.json",
+  "umbral": 0.5,
+  "parametros_modelos": "configuracion_modelos_iniciales.json",
+  "variantes": {
+    "P99 ingreso y familia": {
+      "p99": true,
+      "sin_hijos": false,
+      "log_ingreso": false
+    },
+    "P99 sin hijos": {
+      "p99": true,
+      "sin_hijos": true,
+      "log_ingreso": false
+    },
+    "Log ingreso": {
+      "p99": false,
+      "sin_hijos": false,
+      "log_ingreso": true
+    },
+    "P99 + log sin hijos": {
+      "p99": true,
+      "sin_hijos": true,
+      "log_ingreso": true
+    }
+  },
+  "recorte": {
+    "cuantil": 0.99,
+    "columnas": [
+      "Annual_income",
+      "Family_Members"
+    ],
+    "interpolacion": {
+      "Annual_income": "linear",
+      "Family_Members": "higher"
+    },
+    "ajuste": "Solo entrenamiento de cada fold"
+  },
+  "log_ingreso": "log1p(Annual_income), después del recorte cuando se combinan",
+  "orden": [
+    "recorte opcional",
+    "logaritmo opcional",
+    "representación y reglas",
+    "selección de entradas, imputación y codificación/escalado",
+    "modelo"
+  ],
+  "criterio": "Conservar actual si la mejora de F1 es menor de 0,01; revisar diferencias por fold",
+  "preparaciones_elegidas": {
+    "Random Forest": "Actual",
+    "Logística": "Actual"
+  },
+  "grid_search_ejecutado": false,
+  "test_evaluado": false
+}

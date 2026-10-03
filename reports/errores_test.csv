@@ -1,0 +1,5 @@
+Modelo,TN,FP,FN,TP
+Logística,191,84,17,18
+Árbol,209,66,20,15
+Random Forest,269,6,17,18
+Random Forest ajustado,265,10,18,17

@@ -1,0 +1,3 @@
+Modelo,TN,FP,FN,TP
+Random Forest,1060,38,77,63
+Random Forest ajustado,1050,48,72,68

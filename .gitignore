@@ -16,6 +16,9 @@ __pycache__/
 /reports/**/predicciones*.csv
 /reports/**/casos*.csv
 
-# Los artefactos entrenados se incorporarán solo al preparar la entrega
+# Artefactos entrenados de uso local, excluidos de la entrega pública
 *.joblib
 *.pkl
+
+# Memoria interna trasladada fuera del repositorio público
+/docs/Memoria-proyecto.md

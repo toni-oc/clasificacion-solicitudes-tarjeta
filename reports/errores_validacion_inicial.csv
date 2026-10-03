@@ -1,6 +1,4 @@
 Modelo,TN,FP,FN,TP
-Mayoritaria,1098,0,140,0
-Siempre rechazo,0,1098,0,140
 Logística,725,373,69,71
-Árbol,1004,94,80,60
+Árbol,673,425,62,78
 Random Forest,1060,38,77,63
